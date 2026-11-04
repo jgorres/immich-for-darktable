@@ -96,6 +96,7 @@ end
 
 local json
 
+-- luacheck: push ignore
 do
 --
 -- json.lua
@@ -485,6 +486,7 @@ end
 
 
 end
+-- luacheck: pop
 
 -- ---------------------------------------------------------------------------
 -- Constants and script manager data
@@ -663,7 +665,7 @@ end
 -- @return string|nil Error message.
 local function parse_path_map(spec)
   local map = {}
-  for _i, raw in ipairs(split(spec or "", ";")) do
+  for _idx, raw in ipairs(split(spec or "", ";")) do -- luacheck: ignore _idx
     local entry = trim(raw)
     if entry ~= "" then
       local container, host = entry:match("^([^=]+)=(.+)$")
@@ -695,7 +697,7 @@ end
 -- @param original string Path as reported by Immich.
 -- @return string|nil Local path or nil if no prefix matches.
 local function map_path(map, original)
-  for _i, m in ipairs(map) do
+  for _idx, m in ipairs(map) do -- luacheck: ignore _idx
     if original == m.container or original:sub(1, #m.container + 1) == m.container .. "/" then
       local rest = original:sub(#m.container + 1)
       if OS == "windows" then
@@ -856,8 +858,12 @@ local function api_request(settings, path, body)
     return data
   end
 
-  if decoded_ok and type(data) == "table" and data.statusCode then
+  -- Immich error bodies carry statusCode and message; some (e.g. 401) only
+  -- a message, so fall back to the HTTP status curl prints on stderr.
+  local http_code = tonumber(errtext:match("returned error: (%d%d%d)"))
+  if decoded_ok and type(data) == "table" and (data.statusCode or http_code) then
     local code, msg = immich_error(data)
+    code = code or http_code
     if code == 401 or code == 403 then
       return nil, string.format(_("Immich rejected the API key or its permissions (HTTP %d): %s"), code, msg)
     end
@@ -943,7 +949,7 @@ end
 local function result_tag_name(prefix, query, mode)
   local base = query
   if base == "" then
-    base = mode == MODE_SMART and "smart" or "metadata"
+    base = mode == MODE_METADATA and "metadata" or "smart"
   end
   base = base:gsub("[%c|]", " ")
   base = trim((base:gsub("%s+", " ")))
@@ -958,10 +964,10 @@ end
 -- @param tag table darktable tag object.
 local function detach_from_all(tag)
   local images = {}
-  for _i, image in ipairs(tag) do
+  for _idx, image in ipairs(tag) do -- luacheck: ignore _idx
     table.insert(images, image)
   end
-  for _i, image in ipairs(images) do
+  for _idx, image in ipairs(images) do -- luacheck: ignore _idx
     dt.tags.detach(tag, image)
   end
 end
@@ -1290,7 +1296,7 @@ end
 if dt.gui.current_view().id == "lighttable" then
   install_module()
 else
-  dt.register_event(MODULE, "view-changed", function(event, old_view, new_view)
+  dt.register_event(MODULE, "view-changed", function(_event, _old_view, new_view) -- luacheck: ignore _event _old_view
     if new_view.id == "lighttable" then
       install_module()
     end
@@ -1304,5 +1310,19 @@ script_data.destroy = destroy
 script_data.destroy_method = "hide"
 script_data.restart = restart
 script_data.show = restart
+
+-- Internal functions exposed for the test harness in tests/; not part of the UI.
+script_data.internal = {
+  parse_path_map = parse_path_map,
+  map_path = map_path,
+  result_tag_name = result_tag_name,
+  build_request = build_request,
+  load_settings = load_settings,
+  api_request = api_request,
+  run_search = run_search,
+  check_connection = check_connection,
+  widgets = W,
+  state = state,
+}
 
 return script_data
