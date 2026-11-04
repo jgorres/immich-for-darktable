@@ -1,11 +1,11 @@
 # Immich for Darktable
 
-Lua-Skript für Darktable: Suche in Immich (Bildinhalt per CLIP oder
-Metadaten) direkt aus dem Leuchttisch, Treffer als Sammlung, Bearbeitung
-der Originale in der Dunkelkammer.
+Lua script for darktable: search Immich (image content via CLIP or
+metadata) directly from the lighttable, show the hits as a collection and
+edit the originals in the darkroom.
 
-Status: Konzeptphase, siehe `konzept.md`.
+Status: concept phase, see `concept.md`.
 
-Fokus ist die Flatpak-Installation von Darktable unter Linux; das Skript
-wird so geschrieben, dass es auch mit Darktable aus Paketquellen sowie
-unter Windows und macOS läuft (einzige Abhängigkeit: `curl`).
+The focus is the Flatpak installation of darktable on Linux; the script is
+written so that it also runs with darktable from distribution packages and
+on Windows and macOS (only dependency: `curl`).
