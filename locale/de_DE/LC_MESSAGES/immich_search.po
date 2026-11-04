@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: immich_search 0.2.0\n"
 "Report-Msgid-Bugs-To: joern@gorres.com\n"
-"POT-Creation-Date: 2026-11-04 11:32+0100\n"
+"POT-Creation-Date: 2026-11-04 11:42+0100\n"
 "PO-Revision-Date: 2026-11-04 12:00+0100\n"
 "Last-Translator: Jörn Gorres <joern@gorres.com>\n"
 "Language-Team: German\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: immich_search.lua:512 immich_search.lua:1316
+#: immich_search.lua:512 immich_search.lua:1334
 msgid "Immich search"
 msgstr "Immich-Suche"
 
@@ -145,149 +145,153 @@ msgstr "curl ist zu alt; Version 7.76 oder neuer wird benötigt"
 msgid "curl failed (exit %d): %s"
 msgstr "curl fehlgeschlagen (Exit-Code %d): %s"
 
-#: immich_search.lua:914
+#: immich_search.lua:926
 msgid "dates must be entered as YYYY-MM-DD"
 msgstr "Datumsangaben im Format JJJJ-MM-TT eingeben"
 
-#: immich_search.lua:922
-msgid "enter a search text for the smart search"
-msgstr "für die Smart-Suche einen Suchtext eingeben"
+#: immich_search.lua:934
+msgid "enter a search text in the top field for the smart search, or set a filter"
+msgstr "für die Smart-Suche einen Suchtext ins oberste Feld eingeben oder einen Filter setzen"
 
-#: immich_search.lua:1032
+#: immich_search.lua:1047
 msgid "searching ..."
 msgstr "suche ..."
 
-#: immich_search.lua:1048
+#: immich_search.lua:1063
 msgid "importing Immich results"
 msgstr "Immich-Treffer werden importiert"
 
-#: immich_search.lua:1104
+#: immich_search.lua:1119
 #, lua-format
 msgid "%d of %d hits shown, %d without mapping, %d missing, %d skipped"
 msgstr "%d von %d Treffern angezeigt, %d ohne Abbildung, %d fehlend, %d übersprungen"
 
-#: immich_search.lua:1119
+#: immich_search.lua:1122
+msgid "no search text: filter search"
+msgstr "ohne Suchtext: Filtersuche"
+
+#: immich_search.lua:1137
 msgid "checking ..."
 msgstr "prüfe ..."
 
-#: immich_search.lua:1132
+#: immich_search.lua:1150
 #, lua-format
 msgid "Immich %s reachable, but: %s"
 msgstr "Immich %s erreichbar, aber: %s"
 
-#: immich_search.lua:1138
+#: immich_search.lua:1156
 #, lua-format
 msgid "Immich %s reachable, API key accepted"
 msgstr "Immich %s erreichbar, API-Schlüssel akzeptiert"
 
-#: immich_search.lua:1146
+#: immich_search.lua:1164
 msgid "on"
 msgstr "an"
 
-#: immich_search.lua:1146
+#: immich_search.lua:1164
 msgid "off"
 msgstr "aus"
 
-#: immich_search.lua:1149
+#: immich_search.lua:1167
 msgid "smart search"
 msgstr "Smart-Suche"
 
-#: immich_search.lua:1149
+#: immich_search.lua:1167
 msgid "OCR"
 msgstr "OCR"
 
-#: immich_search.lua:1163
+#: immich_search.lua:1181
 msgid "search text (smart) or file name (metadata)"
 msgstr "Suchtext (Smart) oder Dateiname (Metadaten)"
 
-#: immich_search.lua:1164
+#: immich_search.lua:1182
 msgid "smart: describe the image content; metadata: part of the file name, case-insensitive"
 msgstr "Smart: Bildinhalt beschreiben; Metadaten: Teil des Dateinamens, Groß-/Kleinschreibung egal"
 
-#: immich_search.lua:1169
+#: immich_search.lua:1187
 msgid "mode"
 msgstr "Modus"
 
-#: immich_search.lua:1170
+#: immich_search.lua:1188
 msgid "smart search uses the image content (CLIP), metadata search uses file name and filters only"
 msgstr "Smart-Suche nutzt den Bildinhalt (CLIP), Metadaten-Suche nur Dateiname und Filter"
 
-#: immich_search.lua:1172
+#: immich_search.lua:1190
 msgid "smart (image content)"
 msgstr "Smart (Bildinhalt)"
 
-#: immich_search.lua:1173
+#: immich_search.lua:1191
 msgid "metadata"
 msgstr "Metadaten"
 
-#: immich_search.lua:1177
+#: immich_search.lua:1195
 msgid "taken from (YYYY-MM-DD)"
 msgstr "aufgenommen ab (JJJJ-MM-TT)"
 
-#: immich_search.lua:1182
+#: immich_search.lua:1200
 msgid "taken until (YYYY-MM-DD)"
 msgstr "aufgenommen bis (JJJJ-MM-TT)"
 
-#: immich_search.lua:1187
+#: immich_search.lua:1205
 msgid "camera make"
 msgstr "Kamerahersteller"
 
-#: immich_search.lua:1192
+#: immich_search.lua:1210
 msgid "camera model"
 msgstr "Kameramodell"
 
-#: immich_search.lua:1197
+#: immich_search.lua:1215
 msgid "text in the image (OCR)"
 msgstr "Text im Bild (OCR)"
 
-#: immich_search.lua:1198
+#: immich_search.lua:1216
 msgid "matches text recognised inside the images; needs OCR enabled on the server"
 msgstr "findet im Bild erkannten Text; setzt aktivierte OCR auf dem Server voraus"
 
-#: immich_search.lua:1203
+#: immich_search.lua:1221
 msgid "favourites only"
 msgstr "nur Favoriten"
 
-#: immich_search.lua:1208
+#: immich_search.lua:1226
 msgid "rating"
 msgstr "Bewertung"
 
-#: immich_search.lua:1209
+#: immich_search.lua:1227
 msgid "exact Immich rating, 'any' disables the filter"
 msgstr "exakte Immich-Bewertung, 'beliebig' schaltet den Filter ab"
 
-#: immich_search.lua:1211
+#: immich_search.lua:1229
 msgid "any"
 msgstr "beliebig"
 
-#: immich_search.lua:1215
+#: immich_search.lua:1233
 msgid "max. hits"
 msgstr "max. Treffer"
 
-#: immich_search.lua:1216
+#: immich_search.lua:1234
 msgid "smart search always returns this many hits when enough assets exist"
 msgstr "die Smart-Suche liefert immer so viele Treffer, sofern genug Bilder vorhanden sind"
 
-#: immich_search.lua:1227
+#: immich_search.lua:1245
 msgid "open first hit in the darkroom"
 msgstr "ersten Treffer in der Dunkelkammer öffnen"
 
-#: immich_search.lua:1262
+#: immich_search.lua:1280
 msgid "search"
 msgstr "suchen"
 
-#: immich_search.lua:1269
+#: immich_search.lua:1287
 msgid "check connection"
 msgstr "Verbindung prüfen"
 
-#: immich_search.lua:1276
+#: immich_search.lua:1294
 msgid "restore previous collection"
 msgstr "vorherige Sammlung wiederherstellen"
 
-#: immich_search.lua:1287
+#: immich_search.lua:1305
 msgid "filters"
 msgstr "Filter"
 
-#: immich_search.lua:1296
+#: immich_search.lua:1314
 msgid "result"
 msgstr "Ergebnis"

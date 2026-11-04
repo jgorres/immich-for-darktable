@@ -1,8 +1,8 @@
 # Immich for Darktable – Concept
 
-Version: 0.1.5
+Version: 0.1.6
 Date: 2026-11-04
-Status: implemented as immich_search.lua 0.2.1
+Status: implemented as immich_search.lua 0.2.2
 
 ## 1. Goal
 
@@ -192,7 +192,9 @@ prefix are counted and reported in the status line.
 ## 7. Search flow
 
 1. Validate settings (URL, key, curl present); on error show a message, no
-   request.
+   request. Smart mode without a search text uses the metadata endpoint when
+   at least one filter is set (status line: "no search text: filter search")
+   and reports an error only when nothing at all was entered.
 2. Build the request body as a Lua table, encode it to JSON with the
    embedded encoder and write it to a temporary file; write a header file
    with `x-api-key`, `Content-Type`, `Accept`.
@@ -342,3 +344,4 @@ replaced.
 | 0.1.3 | 2026-11-04 | GUI acceptance complete via D-Bus; open first hit fixed (script 0.1.1) |
 | 0.1.4 | 2026-11-04 | Script 0.2.0: empty defaults with hints, German translation via own text domain |
 | 0.1.5 | 2026-11-04 | Script 0.2.1: OCR filter, feature flags in check connection, limit capped at 200 (cross-checked with drolosoft/immich-photo-manager); extensions 2a/2b |
+| 0.1.6 | 2026-11-04 | Script 0.2.2: smart mode without text falls back to the filter search |

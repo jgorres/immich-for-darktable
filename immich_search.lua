@@ -77,7 +77,7 @@ local df = require "lib/dtutils.file"
 local dsys = require "lib/dtutils.system"
 
 local MODULE = "immich_search"
-local VERSION = "0.2.1"
+local VERSION = "0.2.2"
 local MIN_API = "9.3.0"
 
 du.check_min_api_version(MIN_API, MODULE)
@@ -904,11 +904,23 @@ local function valid_date(s)
   return s == "" or s:match("^%d%d%d%d%-%d%d%-%d%d$") ~= nil
 end
 
+--- Tell whether any filter besides the search text is set.
+-- @param p table Parameters read from the widgets.
+-- @return boolean True when at least one filter has a value.
+local function has_filter(p)
+  return p.date_from ~= "" or p.date_to ~= "" or p.make ~= "" or p.model ~= ""
+    or p.ocr ~= "" or p.favorites or p.rating > 0
+end
+
 --- Build endpoint and request body from the module's input values.
+-- In smart mode without a search text the request falls back to the
+-- metadata endpoint when at least one filter is set, so that e.g. an OCR
+-- word alone finds images without forcing the user to switch the mode.
 -- @param p table Parameters read from the widgets.
 -- @return string|nil API path or nil on error.
 -- @return table|nil Request body.
 -- @return string|nil Error message.
+-- @return boolean True when smart mode fell back to the filter search.
 local function build_request(p)
   if not valid_date(p.date_from) or not valid_date(p.date_to) then
     return nil, nil, _("dates must be entered as YYYY-MM-DD")
@@ -916,14 +928,17 @@ local function build_request(p)
 
   local body = { size = p.limit, page = 1, type = "IMAGE", withExif = true }
   local endpoint
+  local fallback = false
 
-  if p.mode == MODE_SMART then
-    if p.query == "" then
-      return nil, nil, _("enter a search text for the smart search")
-    end
+  if p.mode == MODE_SMART and p.query == "" and not has_filter(p) then
+    return nil, nil, _("enter a search text in the top field for the smart search, or set a filter")
+  end
+
+  if p.mode == MODE_SMART and p.query ~= "" then
     endpoint = "/api/search/smart"
     body.query = p.query
   else
+    fallback = p.mode == MODE_SMART
     endpoint = "/api/search/metadata"
     if p.query ~= "" then
       body.originalFileName = p.query
@@ -952,7 +967,7 @@ local function build_request(p)
     body.rating = p.rating
   end
 
-  return endpoint, body
+  return endpoint, body, nil, fallback
 end
 
 --- Derive the result tag name from the query.
@@ -1022,7 +1037,7 @@ local function run_search(p)
     return
   end
 
-  local endpoint, body, berr = build_request(p)
+  local endpoint, body, berr, fallback = build_request(p)
   if not endpoint then
     set_status(berr)
     dt.print(berr)
@@ -1103,6 +1118,9 @@ local function run_search(p)
   local status = string.format(
     _("%d of %d hits shown, %d without mapping, %d missing, %d skipped"),
     #images, total, skipped.unmapped, skipped.missing, skipped.other)
+  if fallback then
+    status = _("no search text: filter search") .. "; " .. status
+  end
   set_status(status)
   dt.print(status)
 end

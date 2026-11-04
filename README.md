@@ -6,7 +6,7 @@ show the hits as a collection and edit the originals in the darkroom.
 darktable works on the original files; edits stay in the XMP sidecars that
 Immich picks up on its next library scan.
 
-Status: 0.2.1, working on the author's setup (darktable 5.6.2 Flatpak,
+Status: 0.2.2, working on the author's setup (darktable 5.6.2 Flatpak,
 Immich v3.3.5). Design notes in `concept.md`. UI in English and German.
 
 ## Requirements
@@ -69,6 +69,8 @@ Lighttable > module "Immich search":
 - enter a search text, pick the mode (smart or metadata), set filters
   (date range, camera make/model, text recognised in the image, favourites,
   rating) and the maximum number of hits (up to 200), press **search**
+- smart mode without a search text but with at least one filter runs a
+  filter search instead; the status line says so
 - the hits are imported, tagged `<tag prefix>|<query>` and shown as the
   current collection; **open first hit in the darkroom** does what it says
 - **restore previous collection** returns to the collection that was

@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: immich_search 0.2.1\n"
+"Project-Id-Version: immich_search 0.2.2\n"
 "Report-Msgid-Bugs-To: joern@gorres.com\n"
-"POT-Creation-Date: 2026-11-04 11:32+0100\n"
+"POT-Creation-Date: 2026-11-04 11:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: immich_search.lua:512 immich_search.lua:1316
+#: immich_search.lua:512 immich_search.lua:1334
 msgid "Immich search"
 msgstr ""
 
@@ -159,154 +159,159 @@ msgstr ""
 msgid "curl failed (exit %d): %s"
 msgstr ""
 
-#: immich_search.lua:914
+#: immich_search.lua:926
 msgid "dates must be entered as YYYY-MM-DD"
 msgstr ""
 
-#: immich_search.lua:922
-msgid "enter a search text for the smart search"
+#: immich_search.lua:934
+msgid ""
+"enter a search text in the top field for the smart search, or set a filter"
 msgstr ""
 
-#: immich_search.lua:1032
+#: immich_search.lua:1047
 msgid "searching ..."
 msgstr ""
 
-#: immich_search.lua:1048
+#: immich_search.lua:1063
 msgid "importing Immich results"
 msgstr ""
 
-#: immich_search.lua:1104
+#: immich_search.lua:1119
 #, lua-format
 msgid "%d of %d hits shown, %d without mapping, %d missing, %d skipped"
 msgstr ""
 
-#: immich_search.lua:1119
+#: immich_search.lua:1122
+msgid "no search text: filter search"
+msgstr ""
+
+#: immich_search.lua:1137
 msgid "checking ..."
 msgstr ""
 
-#: immich_search.lua:1132
+#: immich_search.lua:1150
 #, lua-format
 msgid "Immich %s reachable, but: %s"
 msgstr ""
 
-#: immich_search.lua:1138
+#: immich_search.lua:1156
 #, lua-format
 msgid "Immich %s reachable, API key accepted"
 msgstr ""
 
-#: immich_search.lua:1146
+#: immich_search.lua:1164
 msgid "on"
 msgstr ""
 
-#: immich_search.lua:1146
+#: immich_search.lua:1164
 msgid "off"
 msgstr ""
 
-#: immich_search.lua:1149
+#: immich_search.lua:1167
 msgid "smart search"
 msgstr ""
 
-#: immich_search.lua:1149
+#: immich_search.lua:1167
 msgid "OCR"
 msgstr ""
 
-#: immich_search.lua:1163
+#: immich_search.lua:1181
 msgid "search text (smart) or file name (metadata)"
 msgstr ""
 
-#: immich_search.lua:1164
+#: immich_search.lua:1182
 msgid ""
 "smart: describe the image content; metadata: part of the file name, case-"
 "insensitive"
 msgstr ""
 
-#: immich_search.lua:1169
+#: immich_search.lua:1187
 msgid "mode"
 msgstr ""
 
-#: immich_search.lua:1170
+#: immich_search.lua:1188
 msgid ""
 "smart search uses the image content (CLIP), metadata search uses file name "
 "and filters only"
 msgstr ""
 
-#: immich_search.lua:1172
+#: immich_search.lua:1190
 msgid "smart (image content)"
 msgstr ""
 
-#: immich_search.lua:1173
+#: immich_search.lua:1191
 msgid "metadata"
 msgstr ""
 
-#: immich_search.lua:1177
+#: immich_search.lua:1195
 msgid "taken from (YYYY-MM-DD)"
 msgstr ""
 
-#: immich_search.lua:1182
+#: immich_search.lua:1200
 msgid "taken until (YYYY-MM-DD)"
 msgstr ""
 
-#: immich_search.lua:1187
+#: immich_search.lua:1205
 msgid "camera make"
 msgstr ""
 
-#: immich_search.lua:1192
+#: immich_search.lua:1210
 msgid "camera model"
 msgstr ""
 
-#: immich_search.lua:1197
+#: immich_search.lua:1215
 msgid "text in the image (OCR)"
 msgstr ""
 
-#: immich_search.lua:1198
+#: immich_search.lua:1216
 msgid ""
 "matches text recognised inside the images; needs OCR enabled on the server"
 msgstr ""
 
-#: immich_search.lua:1203
+#: immich_search.lua:1221
 msgid "favourites only"
 msgstr ""
 
-#: immich_search.lua:1208
+#: immich_search.lua:1226
 msgid "rating"
 msgstr ""
 
-#: immich_search.lua:1209
+#: immich_search.lua:1227
 msgid "exact Immich rating, 'any' disables the filter"
 msgstr ""
 
-#: immich_search.lua:1211
+#: immich_search.lua:1229
 msgid "any"
 msgstr ""
 
-#: immich_search.lua:1215
+#: immich_search.lua:1233
 msgid "max. hits"
 msgstr ""
 
-#: immich_search.lua:1216
+#: immich_search.lua:1234
 msgid "smart search always returns this many hits when enough assets exist"
 msgstr ""
 
-#: immich_search.lua:1227
+#: immich_search.lua:1245
 msgid "open first hit in the darkroom"
 msgstr ""
 
-#: immich_search.lua:1262
+#: immich_search.lua:1280
 msgid "search"
 msgstr ""
 
-#: immich_search.lua:1269
+#: immich_search.lua:1287
 msgid "check connection"
 msgstr ""
 
-#: immich_search.lua:1276
+#: immich_search.lua:1294
 msgid "restore previous collection"
 msgstr ""
 
-#: immich_search.lua:1287
+#: immich_search.lua:1305
 msgid "filters"
 msgstr ""
 
-#: immich_search.lua:1296
+#: immich_search.lua:1314
 msgid "result"
 msgstr ""

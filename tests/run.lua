@@ -55,8 +55,13 @@ local function with(overrides)
   for k, v in pairs(overrides) do p[k] = v end
   return p
 end
-local ep, body, berr = I.build_request(with({}))
-check(ep == nil and berr ~= nil and body == nil, "smart search without text is rejected")
+local ep, body, berr, fallback = I.build_request(with({}))
+check(ep == nil and berr ~= nil and body == nil and not fallback, "smart search without text and filters is rejected")
+ep, body, berr, fallback = I.build_request(with({ ocr = "Feuerwehr" }))
+check(ep == "/api/search/metadata" and body.ocr == "Feuerwehr" and body.query == nil and berr == nil and fallback == true,
+  "smart mode without text but with a filter falls back to the filter search")
+ep, body, berr, fallback = I.build_request(with({ query = "dog" }))
+check(ep == "/api/search/smart" and body.query == "dog" and berr == nil and fallback == false, "smart mode with text stays smart")
 ep, body = I.build_request(with({
   query = "dog", date_from = "2020-01-01", date_to = "2020-12-31", make = "Canon", favorites = true, rating = 3,
 }))
