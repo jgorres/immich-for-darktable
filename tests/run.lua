@@ -46,7 +46,7 @@ check(utf8.len(tn) == 2 + 60, "tag name truncated to 60 characters at UTF-8 boun
 
 -- request building ---------------------------------------------------------
 local base = {
-  query = "", mode = 1, date_from = "", date_to = "", make = "", model = "",
+  query = "", mode = 1, date_from = "", date_to = "", make = "", model = "", ocr = "",
   favorites = false, rating = 0, limit = 50, open_first = false,
 }
 local function with(overrides)
@@ -62,7 +62,11 @@ ep, body = I.build_request(with({
 }))
 check(ep == "/api/search/smart" and body.query == "dog" and body.size == 50 and body.type == "IMAGE", "smart request basics")
 check(body.takenAfter == "2020-01-01T00:00:00.000Z" and body.takenBefore == "2020-12-31T23:59:59.999Z", "date filters as ISO timestamps")
-check(body.make == "Canon" and body.isFavorite == true and body.rating == 3 and body.model == nil, "optional filters only when set")
+check(body.make == "Canon" and body.isFavorite == true and body.rating == 3 and body.model == nil and body.ocr == nil,
+  "optional filters only when set")
+ep, body = I.build_request(with({ mode = 2, ocr = "ticket" }))
+check(ep == "/api/search/metadata" and body.ocr == "ticket" and body.originalFileName == nil, "OCR filter is passed through")
+check(I.widgets.limit.hard_max == 200 and I.widgets.limit.soft_max == 200, "hit limit capped at 200")
 ep, body = I.build_request(with({ mode = 2, query = "IMG_2" }))
 check(ep == "/api/search/metadata" and body.originalFileName == "IMG_2" and body.query == nil, "metadata request uses originalFileName")
 ep, body = I.build_request(with({ mode = 2 }))
@@ -109,6 +113,7 @@ if live then
   I.check_connection()
   local status = I.widgets.status.label
   check(status:find("API key accepted", 1, true), "check_connection: " .. status)
+  check(status:find("smart search: on", 1, true), "feature flags reported in check_connection")
 
   stub.prefs["immich_search/api_key"] = "wrong-key"
   I.check_connection()

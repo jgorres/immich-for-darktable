@@ -1,8 +1,8 @@
 # Immich for Darktable – Concept
 
-Version: 0.1.4
+Version: 0.1.5
 Date: 2026-11-04
-Status: implemented as immich_search.lua 0.2.0 (generic defaults, German translation)
+Status: implemented as immich_search.lua 0.2.1
 
 ## 1. Goal
 
@@ -109,6 +109,7 @@ Source: OpenAPI specification v3.3.5 from the Immich repository.
 |---|---|---|---|
 | GET | `/api/server/ping` | reachability ("Check connection" button) | none |
 | GET | `/api/server/version` | show version, check minimum version | none |
+| GET | `/api/server/features` | feature flags `smartSearch`, `ocr` for "check connection" | none |
 | POST | `/api/search/smart` | free text (CLIP) with optional filters | asset.read |
 | POST | `/api/search/metadata` | pure filter search without free text | asset.read |
 | GET | `/api/assets/{id}/original` | download mode only | asset.download |
@@ -117,8 +118,8 @@ Source: OpenAPI specification v3.3.5 from the Immich repository.
 
 Request (`SmartSearchDto` or `MetadataSearchDto`), first stage:
 `query` (smart only), `originalFileName` (metadata only), `takenAfter`,
-`takenBefore`, `make`, `model`, `isFavorite`, `rating`, `type` = `IMAGE`,
-`size`, `page`, `withExif` = true.
+`takenBefore`, `make`, `model`, `ocr`, `isFavorite`, `rating`, `type` = `IMAGE`,
+`size` (capped at 200), `page`, `withExif` = true.
 
 Response (`SearchResponseDto.assets.items[]`, type `AssetResponseDto`):
 `id`, `originalPath`, `originalFileName`, `originalMimeType`, `type`,
@@ -166,9 +167,9 @@ Widget order, top to bottom:
 2. Mode: "Smart (image content)" or "Metadata". In "Metadata" mode the entry
    acts as a file name filter.
 3. Taken from / to (ISO date, empty = none).
-4. Camera make and camera model (two entries, empty = none).
+4. Camera make, camera model, text in the image (OCR; three entries, empty = none).
 5. Favourites only (toggle), rating (combobox any/1–5, exact match).
-6. Hits (slider 1–200, hard maximum 500, default 50).
+6. Hits (slider 1–200, default 50).
 7. Open first hit after the search (toggle).
 8. Buttons: "search", "check connection", "restore previous collection".
 9. Status line.
@@ -307,6 +308,12 @@ covered by the path mapping tests and the type filter.
    search by `originalFileName`, browser opens `/photos/<id>`.
 2. **People, albums, tags** as selection lists loaded from the API
    (`person.read`, `album.read`, `tag.read`).
+2a. **Similar images:** `queryAssetId` in the smart search returns assets
+   visually similar to a given one. From darktable: button on the selected
+   image, asset id found via `originalFileName`, same path as the reverse
+   direction in 1.
+2b. **Places:** `/search/places` and `/search/cities` as selection lists for
+   a location filter (`city`, `country`, `state` in both search DTOs).
 3. **Download mode** for machines without a share: original to
    `download_dir`, then import; with a note that edits stay local.
 4. **Paging** (`nextPage`).
@@ -317,8 +324,6 @@ covered by the path mapping tests and the type filter.
 
 ## 12. Open points
 
-- Upper bound of the limit (soft 200, hard 500) after measuring import
-  duration with RAW files.
 - Script manager "install additional scripts" needs a public repository;
   decide when to publish.
 
@@ -336,3 +341,4 @@ replaced.
 | 0.1.2 | 2026-11-04 | Findings from implementation and first tests: API 9.7.0, `collect.filter`, exact rating, substring file name, SVG hits, 401 body, test harness, licence decided |
 | 0.1.3 | 2026-11-04 | GUI acceptance complete via D-Bus; open first hit fixed (script 0.1.1) |
 | 0.1.4 | 2026-11-04 | Script 0.2.0: empty defaults with hints, German translation via own text domain |
+| 0.1.5 | 2026-11-04 | Script 0.2.1: OCR filter, feature flags in check connection, limit capped at 200 (cross-checked with drolosoft/immich-photo-manager); extensions 2a/2b |

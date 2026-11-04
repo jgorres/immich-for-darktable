@@ -49,7 +49,8 @@
 
   USAGE
   * lighttable > module "Immich search"
-  * enter a search text, choose the mode, optionally set filters, press
+  * enter a search text, choose the mode, optionally set filters (date,
+    camera, text recognised in the image, favourites, rating), press
     "search"; the lighttable then shows the hits as a collection
   * "restore previous collection" brings back the collection that was
     active before the first Immich search
@@ -76,7 +77,7 @@ local df = require "lib/dtutils.file"
 local dsys = require "lib/dtutils.system"
 
 local MODULE = "immich_search"
-local VERSION = "0.2.0"
+local VERSION = "0.2.1"
 local MIN_API = "9.3.0"
 
 du.check_min_api_version(MIN_API, MODULE)
@@ -941,6 +942,9 @@ local function build_request(p)
   if p.model ~= "" then
     body.model = p.model
   end
+  if p.ocr ~= "" then
+    body.ocr = p.ocr
+  end
   if p.favorites then
     body.isFavorite = true
   end
@@ -1132,6 +1136,19 @@ local function check_connection()
   end
 
   local msg = string.format(_("Immich %s reachable, API key accepted"), vs)
+
+  -- Feature flags tell whether smart search and OCR are enabled on this
+  -- server. A key without the needed permission gets an error; then the
+  -- flags are simply left out.
+  local features = api_request(settings, "/api/server/features")
+  if type(features) == "table" and features.smartSearch ~= nil then
+    local function flag(v)
+      return v and _("on") or _("off")
+    end
+    msg = msg .. string.format(" (%s: %s, %s: %s)",
+      _("smart search"), flag(features.smartSearch), _("OCR"), flag(features.ocr))
+  end
+
   set_status(msg)
   dt.print(msg)
 end
@@ -1176,6 +1193,12 @@ W.model = dt.new_widget("entry") {
   editable = true,
 }
 
+W.ocr = dt.new_widget("entry") {
+  placeholder = _("text in the image (OCR)"),
+  tooltip = _("matches text recognised inside the images; needs OCR enabled on the server"),
+  editable = true,
+}
+
 W.favorites = dt.new_widget("check_button") {
   label = _("favourites only"),
   value = false,
@@ -1194,7 +1217,7 @@ W.limit = dt.new_widget("slider") {
   soft_min = 1,
   soft_max = 200,
   hard_min = 1,
-  hard_max = 500,
+  hard_max = 200,
   step = 1,
   digits = 0,
   value = 50,
@@ -1227,6 +1250,7 @@ local function read_params()
     date_to = trim(W.date_to.text),
     make = trim(W.make.text),
     model = trim(W.model.text),
+    ocr = trim(W.ocr.text),
     favorites = W.favorites.value and true or false,
     rating = (W.rating.selected or 1) - 1,
     limit = math.floor(W.limit.value + 0.5),
@@ -1265,6 +1289,7 @@ W.box = dt.new_widget("box") {
   W.date_to,
   W.make,
   W.model,
+  W.ocr,
   W.favorites,
   W.rating,
   W.limit,
