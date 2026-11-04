@@ -1,8 +1,8 @@
 # Immich for Darktable – Concept
 
-Version: 0.1.1
+Version: 0.1.2
 Date: 2026-11-04
-Status: draft, no code yet
+Status: implemented as immich_search.lua 0.1.0, first GUI tests passed
 
 ## 1. Goal
 
@@ -25,7 +25,7 @@ sidecar up on its next library scan.
 
 | Item | Finding (2026-11-04) |
 |---|---|
-| darktable | Flatpak `org.darktable.Darktable` 5.6.2, embedded Lua 5.4, script manager active |
+| darktable | Flatpak `org.darktable.Darktable` 5.6.2, embedded Lua 5.4, Lua API 9.7.0, script manager active |
 | Flatpak permissions | `shared=network`, `filesystems=host`, host image folder readable |
 | Tools inside the sandbox | `curl` 8.21 (OpenSSL), `git`; no Lua libraries (no luasocket, luasec, dkjson) |
 | Script folder | `~/.var/app/org.darktable.Darktable/config/darktable/lua/` (checkout of darktable/lua-scripts) |
@@ -47,8 +47,7 @@ The script must also run unchanged with darktable from apt (Debian 13:
 - Temporary files live in `dt.configuration.tmp_dir`, path separators are
   normalised, drive letters are allowed in the path mapping.
 - The minimum API version is checked with `du.check_min_api_version`
-  (target: darktable 5.0; the exact API number is determined during
-  implementation via `dt.configuration.api_version_string`).
+  (9.3.0, i.e. darktable 5.0; darktable 5.6.2 reports 9.7.0).
 - On other machines the originals must be reachable through a share
   (SMB/NFS); the path mapping then points at the mount. Without a share the
   optional download mode applies (extension, section 11).
@@ -80,7 +79,7 @@ dt.database.import(path) per hit (known images are returned unchanged)
 Attach tag "darktable|immich|<query>", detach it from previous hits of the same query
    │
    ▼
-Set collection rule to the tag (dt.gui.libs.collect.set_rules)
+Set collection rule to the tag (dt.gui.libs.collect.filter)
    │
    ▼
 Status line: n hits, m imported, k without local file
@@ -133,6 +132,12 @@ Notes:
   visible in the module and defaults to a small value.
 - Videos are filtered out (`type` = `IMAGE`).
 - Assets with `isOffline` = true are skipped.
+- `originalFileName` is a case-insensitive substring match (verified).
+- `rating` is an exact match, not a minimum (API semantics).
+- Immich counts SVG files as images; darktable cannot import them, so they
+  end up in the "skipped" counter with a log entry.
+- A 401 response carries only `message`, no `statusCode`; the HTTP status
+  is therefore also taken from curl's stderr.
 
 ## 5. darktable Lua building blocks
 
@@ -146,7 +151,7 @@ Notes:
 | `dt.configuration.tmp_dir` | temporary files |
 | `dt.database.import` | bring hits into the library |
 | `dt.tags.create`, `dt.tags.attach`, `dt.tags.detach` | maintain the result tag |
-| `dt.gui.libs.collect.new_rule` / `set_rules` | filter the lighttable by tag (`DT_COLLECTION_PROP_TAG`) |
+| `dt.gui.libs.collect.new_rule` / `filter` | filter the lighttable by tag (`DT_COLLECTION_PROP_TAG`); `filter` returns the previous rules |
 | `dt.gui.views.darkroom.display_image` | open first hit |
 | `dt.gui.create_job` | progress, cancel |
 | `dt.print`, `dt.print_log` | status messages, log |
@@ -156,15 +161,16 @@ Notes:
 
 Widget order, top to bottom:
 
-1. Query (entry; Return triggers the search).
+1. Query (entry; darktable entries have no activate callback, so the
+   search is started with the button).
 2. Mode: "Smart (image content)" or "Metadata". In "Metadata" mode the entry
    acts as a file name filter.
 3. Taken from / to (ISO date, empty = none).
-4. Camera (make/model, empty = none).
-5. Favourites only (toggle), minimum rating (0–5).
-6. Hits (slider 1–200, default 50).
+4. Camera make and camera model (two entries, empty = none).
+5. Favourites only (toggle), rating (combobox any/1–5, exact match).
+6. Hits (slider 1–200, hard maximum 500, default 50).
 7. Open first hit after the search (toggle).
-8. Buttons: "Search", "Check connection".
+8. Buttons: "search", "check connection", "restore previous collection".
 9. Status line.
 
 Settings (darktable preferences, tab Lua options):
@@ -175,12 +181,11 @@ Settings (darktable preferences, tab Lua options):
 | `api_key` | string | empty | Immich API key (see 8.) |
 | `path_map` | string | `/mnt/media/bilder=/mnt/home2/jgorres/Bilder;/data=/mnt/home2/immich/library` | container prefix=host prefix, several separated by `;` |
 | `tag_prefix` | string | `darktable|immich` | parent path of the result tag |
-| `download_mode` | bool | off | extension: download originals instead of mapping |
-| `download_dir` | directory | empty | target folder in download mode |
 | `timeout` | integer | 30 | seconds for curl `--max-time` |
 
-The path mapping is validated on load: every entry needs both sides, the
-host side must exist, `..` is rejected. Hits whose `originalPath` matches no
+The path mapping is validated on every search: every entry needs both
+sides, the container side starts with `/`, `..` is rejected. Download mode
+and its folder are registered only once that extension exists. Hits whose `originalPath` matches no
 prefix are counted and reported in the status line.
 
 ## 7. Search flow
@@ -195,10 +200,12 @@ prefix are counted and reported in the status line.
 4. Evaluate exit code and HTTP status; report 401/403 as "API key or
    permissions", 0/7/28 as "server not reachable".
 5. Parse the response, filter items (type, offline), map paths.
-6. Create the result tag `<tag_prefix>|<sanitised query>`; detach it from
-   images that still carry it so the collection shows only the current result.
+6. Create the result tag `<tag_prefix>|<sanitised query>` (pipes and control
+   characters replaced, at most 60 characters); detach it from images that
+   still carry it so the collection shows only the current result.
 7. Per hit: `dt.database.import`, attach tag, report progress.
-8. Set the collection rule (mode AND, item TAG, data = tag path).
+8. Set the collection rule (mode AND, item TAG, data = tag path); the rules
+   active before the first search are kept for "restore previous collection".
 9. Status line and `dt.print` with counters; optionally open the first hit.
 10. Delete temporary files, also on error.
 
@@ -225,12 +232,17 @@ Location: `~/dev-silentium/immich-for-darktable`, GitHub `jgorres/immich-for-dar
 
 ```
 immich-for-darktable/
-├── immich_search.lua      script (single file, JSON parser embedded)
+├── immich_search.lua        script (single file, JSON parser embedded)
+├── tests/run.lua            test harness: lua5.4 tests/run.lua [--live]
+├── tests/darktable_stub.lua minimal stand-in for the darktable Lua API
+├── .luacheckrc
 ├── concept.md
 ├── README.md
-├── docs/                  screenshots, manual (later)
-└── LICENSE                open, see 12.
+└── docs/                    screenshots, manual (later)
 ```
+
+Licence: GPL-3.0-or-later (header in the script), because the helpers from
+darktable/lua-scripts are GPL-3.0. The embedded json.lua is MIT.
 
 Development on silentium: symlink
 `~/.var/app/org.darktable.Darktable/config/darktable/lua/immich-for-darktable`
@@ -242,17 +254,33 @@ Distribution later: script manager, action "install additional scripts"
 with the repository URL (requires a public repository), or a copy of the
 single file.
 
-## 10. Tests (acceptance on silentium, Flatpak)
+## 10. Tests
 
-Preparation: dedicated API key in Immich, throwaway tag prefix
-`darktable|immich-test`; afterwards remove tags and imported throwaway images.
+### 10.1 Automated (lua5.4 on silentium)
+
+- `luac5.4 -p immich_search.lua` and `luacheck immich_search.lua tests/`
+  (std lua54, config in `.luacheckrc`).
+- `lua5.4 tests/run.lua`: pure logic against the stub (path mapping, tag
+  names, request building, settings, connection refused, temp files).
+- `lua5.4 tests/run.lua --live`: the same harness against the real server,
+  API key from `pass show immich/darktable-api-key`; covers connection
+  check, wrong key, smart search with import/tag/collection, tag reset on
+  the second search, metadata search with "open first hit", unmapped hits.
+- The stub exposes `script_data.internal`; widgets, `register_lib`, the
+  real import and the collection module are not covered.
+
+### 10.2 Acceptance in the darktable GUI (Flatpak)
+
+Start with `flatpak run org.darktable.Darktable -d lua` and read the log.
+State 2026-11-04: cases 1, 4 and 5 passed in the GUI, 2 and 8 in the live
+harness; the rest is open.
 
 | No. | Case | Expectation |
 |---|---|---|
 | 1 | Check connection with valid key | version is shown |
 | 2 | Wrong key | message "API key or permissions", no import |
 | 3 | Server stopped | message "not reachable" after timeout |
-| 4 | Smart search "dog on the beach", limit 20 | 20 images in the collection, tag set |
+| 4 | Smart search "dog", limit 20 | hits in the collection, tag set (19 of 20: one SVG skipped) |
 | 5 | Second search | collection shows only the new result |
 | 6 | Metadata: file name, date, camera | only matching hits |
 | 7 | Hit from the upload folder | imported via the second mapping |
@@ -274,12 +302,18 @@ Preparation: dedicated API key in Immich, throwaway tag prefix
 
 ## 12. Open points
 
-- Licence: dtutils from lua-scripts is GPL-3.0; the script would then have to
-  be GPL-3.0-or-later (instead of GPL-2.0-or-later like the WordPress projects).
-- Exact minimum API version (darktable 5.0 = ?); determine during implementation.
-- Create the Immich API key for the script (`asset.read` only).
-- Character set for the tag derived from the query (allow umlauts?).
-- Upper bound of the limit (200?) after measuring import duration.
+- Remaining GUI acceptance cases (section 10.2): restore collection,
+  metadata filters, open first hit, script manager stop/start, server down.
+- Upper bound of the limit (soft 200, hard 500) after measuring import
+  duration with RAW files.
+- Generic defaults for server URL and path mapping before the script is
+  shared outside this machine.
+- Translation (de_DE) once the strings are stable.
+
+Decided: licence GPL-3.0-or-later; minimum API 9.3.0; API key created
+2026-11-04 with `asset.read` only, stored in `pass` and darktablerc;
+umlauts are kept in tag names, only `|` and control characters are
+replaced.
 
 ## 13. Changes
 
@@ -287,3 +321,4 @@ Preparation: dedicated API key in Immich, throwaway tag prefix
 |---|---|---|
 | 0.1.0 | 2026-11-04 | First version after analysing the Flatpak environment and the Immich API v3.3.5 |
 | 0.1.1 | 2026-11-04 | Documentation language switched to English, file renamed to `concept.md` |
+| 0.1.2 | 2026-11-04 | Findings from implementation and first tests: API 9.7.0, `collect.filter`, exact rating, substring file name, SVG hits, 401 body, test harness, licence decided |
