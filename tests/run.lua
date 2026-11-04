@@ -71,14 +71,23 @@ ep, body, berr = I.build_request(with({ mode = 2, date_from = "1.2.2020" }))
 check(ep == nil and body == nil and berr ~= nil, "malformed date is rejected")
 
 -- settings -----------------------------------------------------------------
-stub.prefs["immich_search/api_key"] = ""
+check(stub.textdomain and stub.textdomain.domain == "immich_search" and stub.textdomain.dir:find("/locale/$"),
+  "text domain bound to the script's locale folder: " .. tostring(stub.textdomain and stub.textdomain.dir))
+check(stub.prefs["immich_search/server_url"] == "" and stub.prefs["immich_search/path_map"] == "",
+  "server URL and path mapping default to empty")
 local s, serr = I.load_settings()
-check(s == nil and serr ~= nil, "missing API key is reported")
-stub.prefs["immich_search/api_key"] = "abc"
+check(s == nil and serr and serr:find("server URL is not set", 1, true), "empty server URL is reported with a hint")
 stub.prefs["immich_search/server_url"] = "silentium:2283"
 s, serr = I.load_settings()
-check(s == nil and serr ~= nil, "URL without scheme is rejected")
+check(s == nil and serr and serr:find("invalid", 1, true), "URL without scheme is rejected")
 stub.prefs["immich_search/server_url"] = "http://silentium:2283/"
+stub.prefs["immich_search/api_key"] = ""
+s, serr = I.load_settings()
+check(s == nil and serr and serr:find("API key is not set", 1, true), "missing API key is reported with a hint")
+stub.prefs["immich_search/api_key"] = "abc"
+s, serr = I.load_settings()
+check(s == nil and serr and serr:find("path mapping is not set", 1, true), "empty path mapping is reported with a hint")
+stub.prefs["immich_search/path_map"] = "/mnt/media/bilder=/mnt/home2/jgorres/Bilder;/data=/mnt/home2/immich/library"
 s = I.load_settings()
 check(s and s.server_url == "http://silentium:2283" and s.timeout == 30, "trailing slash removed, defaults applied")
 

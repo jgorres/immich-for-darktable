@@ -1,0 +1,198 @@
+# German translation of immich_search.lua (Immich for Darktable).
+# Copyright (C) 2026 Jörn Gorres
+# This file is distributed under the same license as the immich_search package.
+# Jörn Gorres <joern@gorres.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: immich_search 0.2.0\n"
+"Report-Msgid-Bugs-To: joern@gorres.com\n"
+"POT-Creation-Date: 2026-11-04 12:00+0100\n"
+"PO-Revision-Date: 2026-11-04 12:00+0100\n"
+"Last-Translator: Jörn Gorres <joern@gorres.com>\n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Immich search"
+msgstr "Immich-Suche"
+
+msgid "search Immich and show the hits in the lighttable"
+msgstr "Immich durchsuchen und die Treffer im Leuchttisch anzeigen"
+
+msgid "server URL"
+msgstr "Server-URL"
+
+msgid "base URL of the Immich server without trailing slash, e.g. http://immich.local:2283"
+msgstr "Basis-URL des Immich-Servers ohne abschließenden Schrägstrich, z. B. http://immich.local:2283"
+
+msgid "API key"
+msgstr "API-Schlüssel"
+
+msgid "Immich API key with the permission asset.read (stored unencrypted in darktablerc)"
+msgstr "Immich-API-Schlüssel mit der Berechtigung asset.read (wird unverschlüsselt in der darktablerc gespeichert)"
+
+msgid "path mapping"
+msgstr "Pfadabbildung"
+
+msgid "CONTAINER=HOST pairs separated by ';' that translate Immich's originalPath prefixes into local paths, e.g. /mnt/media/photos=/home/me/Pictures;/data=/mnt/immich/library"
+msgstr "Paare CONTAINER=HOST, getrennt durch ';', die die originalPath-Präfixe von Immich in lokale Pfade übersetzen, z. B. /mnt/media/photos=/home/me/Pictures;/data=/mnt/immich/library"
+
+msgid "tag prefix"
+msgstr "Tag-Präfix"
+
+msgid "parent tag under which each search result tag is created"
+msgstr "übergeordneter Tag, unter dem die Tags der Suchergebnisse angelegt werden"
+
+msgid "timeout (seconds)"
+msgstr "Zeitlimit (Sekunden)"
+
+msgid "maximum time for one request to the Immich server"
+msgstr "maximale Dauer einer Anfrage an den Immich-Server"
+
+msgid "path mapping entry '%s' is not CONTAINER=HOST"
+msgstr "Eintrag '%s' der Pfadabbildung hat nicht die Form CONTAINER=HOST"
+
+msgid "path mapping entry '%s' has an empty side"
+msgstr "Eintrag '%s' der Pfadabbildung hat eine leere Seite"
+
+msgid "path mapping entry '%s' must not contain '..'"
+msgstr "Eintrag '%s' der Pfadabbildung darf kein '..' enthalten"
+
+msgid "container path '%s' must start with '/'"
+msgstr "Container-Pfad '%s' muss mit '/' beginnen"
+
+msgid "path mapping is not set: enter CONTAINER=HOST pairs in preferences > lua options > Immich search"
+msgstr "Pfadabbildung ist nicht gesetzt: Paare CONTAINER=HOST unter Einstellungen > Lua-Optionen > Immich search eintragen"
+
+msgid "server URL is not set: enter it in preferences > lua options > Immich search"
+msgstr "Server-URL ist nicht gesetzt: unter Einstellungen > Lua-Optionen > Immich search eintragen"
+
+msgid "server URL is invalid (expected http(s)://host[:port])"
+msgstr "Server-URL ist ungültig (erwartet: http(s)://host[:port])"
+
+msgid "API key is not set: create one in Immich (permission asset.read) and enter it in preferences > lua options > Immich search"
+msgstr "API-Schlüssel ist nicht gesetzt: in Immich einen Schlüssel mit der Berechtigung asset.read anlegen und unter Einstellungen > Lua-Optionen > Immich search eintragen"
+
+msgid "API key contains whitespace"
+msgstr "API-Schlüssel enthält Leerzeichen"
+
+msgid "curl not found; install curl or set its path in preferences > lua options > executable paths"
+msgstr "curl nicht gefunden; curl installieren oder den Pfad unter Einstellungen > Lua-Optionen > Pfade zu ausführbaren Dateien eintragen"
+
+msgid "cannot write a temporary file in darktable's temp directory"
+msgstr "temporäre Datei im Temp-Verzeichnis von darktable kann nicht geschrieben werden"
+
+msgid "cannot encode the request as JSON"
+msgstr "Anfrage kann nicht als JSON kodiert werden"
+
+msgid "invalid JSON in the server response"
+msgstr "ungültiges JSON in der Serverantwort"
+
+msgid "Immich rejected the API key or its permissions (HTTP %d): %s"
+msgstr "Immich hat den API-Schlüssel oder seine Berechtigungen abgelehnt (HTTP %d): %s"
+
+msgid "Immich error (HTTP %s): %s"
+msgstr "Immich-Fehler (HTTP %s): %s"
+
+msgid "Immich server not reachable: %s"
+msgstr "Immich-Server nicht erreichbar: %s"
+
+msgid "curl is too old; version 7.76 or newer is required"
+msgstr "curl ist zu alt; Version 7.76 oder neuer wird benötigt"
+
+msgid "curl failed (exit %d): %s"
+msgstr "curl fehlgeschlagen (Exit-Code %d): %s"
+
+msgid "dates must be entered as YYYY-MM-DD"
+msgstr "Datumsangaben im Format JJJJ-MM-TT eingeben"
+
+msgid "enter a search text for the smart search"
+msgstr "für die Smart-Suche einen Suchtext eingeben"
+
+msgid "searching ..."
+msgstr "suche ..."
+
+msgid "importing Immich results"
+msgstr "Immich-Treffer werden importiert"
+
+msgid "%d of %d hits shown, %d without mapping, %d missing, %d skipped"
+msgstr "%d von %d Treffern angezeigt, %d ohne Abbildung, %d fehlend, %d übersprungen"
+
+msgid "checking ..."
+msgstr "prüfe ..."
+
+msgid "Immich %s reachable, but: %s"
+msgstr "Immich %s erreichbar, aber: %s"
+
+msgid "Immich %s reachable, API key accepted"
+msgstr "Immich %s erreichbar, API-Schlüssel akzeptiert"
+
+msgid "search text (smart) or file name (metadata)"
+msgstr "Suchtext (Smart) oder Dateiname (Metadaten)"
+
+msgid "smart: describe the image content; metadata: part of the file name, case-insensitive"
+msgstr "Smart: Bildinhalt beschreiben; Metadaten: Teil des Dateinamens, Groß-/Kleinschreibung egal"
+
+msgid "mode"
+msgstr "Modus"
+
+msgid "smart search uses the image content (CLIP), metadata search uses file name and filters only"
+msgstr "Smart-Suche nutzt den Bildinhalt (CLIP), Metadaten-Suche nur Dateiname und Filter"
+
+msgid "smart (image content)"
+msgstr "Smart (Bildinhalt)"
+
+msgid "metadata"
+msgstr "Metadaten"
+
+msgid "taken from (YYYY-MM-DD)"
+msgstr "aufgenommen ab (JJJJ-MM-TT)"
+
+msgid "taken until (YYYY-MM-DD)"
+msgstr "aufgenommen bis (JJJJ-MM-TT)"
+
+msgid "camera make"
+msgstr "Kamerahersteller"
+
+msgid "camera model"
+msgstr "Kameramodell"
+
+msgid "favourites only"
+msgstr "nur Favoriten"
+
+msgid "rating"
+msgstr "Bewertung"
+
+msgid "exact Immich rating, 'any' disables the filter"
+msgstr "exakte Immich-Bewertung, 'beliebig' schaltet den Filter ab"
+
+msgid "any"
+msgstr "beliebig"
+
+msgid "max. hits"
+msgstr "max. Treffer"
+
+msgid "smart search always returns this many hits when enough assets exist"
+msgstr "die Smart-Suche liefert immer so viele Treffer, sofern genug Bilder vorhanden sind"
+
+msgid "open first hit in the darkroom"
+msgstr "ersten Treffer in der Dunkelkammer öffnen"
+
+msgid "search"
+msgstr "suchen"
+
+msgid "check connection"
+msgstr "Verbindung prüfen"
+
+msgid "restore previous collection"
+msgstr "vorherige Sammlung wiederherstellen"
+
+msgid "filters"
+msgstr "Filter"
+
+msgid "result"
+msgstr "Ergebnis"

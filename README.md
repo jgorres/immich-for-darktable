@@ -6,8 +6,8 @@ show the hits as a collection and edit the originals in the darkroom.
 darktable works on the original files; edits stay in the XMP sidecars that
 Immich picks up on its next library scan.
 
-Status: 0.1.1, working on the author's setup (darktable 5.6.2 Flatpak,
-Immich v3.3.5). Design notes in `concept.md`.
+Status: 0.2.0, working on the author's setup (darktable 5.6.2 Flatpak,
+Immich v3.3.5). Design notes in `concept.md`. UI in English and German.
 
 ## Requirements
 
@@ -25,9 +25,11 @@ only Linux has been tested so far.
 
 ## Installation
 
-1. Copy `immich_search.lua` to `<darktable config>/lua/immich-for-darktable/`
+1. Copy `immich_search.lua` together with the `locale/` folder to
+   `<darktable config>/lua/immich-for-darktable/`
    (Flatpak: `~/.var/app/org.darktable.Darktable/config/darktable/lua/`),
-   or symlink this repository there.
+   or clone/symlink this repository there. The translations are looked up
+   in `locale/<lang>/LC_MESSAGES/immich_search.mo` next to the script.
 2. Add to `luarc` in the darktable config folder:
 
    ```lua
@@ -41,9 +43,9 @@ only Linux has been tested so far.
 
    | Setting | Meaning |
    |---|---|
-   | server URL | e.g. `http://immich.example:2283`, no trailing slash |
+   | server URL | e.g. `http://immich.example:2283`, no trailing slash (empty by default) |
    | API key | the key from step 3 |
-   | path mapping | `CONTAINER=HOST;CONTAINER=HOST`, see below |
+   | path mapping | `CONTAINER=HOST;CONTAINER=HOST`, see below (empty by default) |
    | tag prefix | parent tag for result tags, default `darktable\|immich` |
    | timeout | seconds per request, default 30 |
 
@@ -92,6 +94,16 @@ luac5.4 -p immich_search.lua && luacheck immich_search.lua tests/
 lua5.4 tests/run.lua          # logic tests against a darktable stub
 lua5.4 tests/run.lua --live   # same, against the real server (key from pass)
 ```
+
+Translations (gettext, text domain `immich_search`):
+
+```
+xgettext -L Lua -k_ -kdgettext:2 --from-code=UTF-8 -o locale/immich_search.pot immich_search.lua
+msgmerge -U locale/de_DE/LC_MESSAGES/immich_search.po locale/immich_search.pot
+msgfmt -c --statistics -o locale/de_DE/LC_MESSAGES/immich_search.mo locale/de_DE/LC_MESSAGES/immich_search.po
+```
+
+The `.mo` files are committed so that a plain copy of the folder works.
 
 ## Licence
 

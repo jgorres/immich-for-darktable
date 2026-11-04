@@ -76,18 +76,22 @@ local df = require "lib/dtutils.file"
 local dsys = require "lib/dtutils.system"
 
 local MODULE = "immich_search"
-local VERSION = "0.1.1"
+local VERSION = "0.2.0"
 local MIN_API = "9.3.0"
 
 du.check_min_api_version(MIN_API, MODULE)
 
-local gettext = dt.gettext.gettext
+-- Translations live next to the script in locale/<lang>/LC_MESSAGES/<MODULE>.mo,
+-- so a copied or cloned folder carries them along on every platform.
+local SCRIPT_DIR = (debug.getinfo(1, "S").source or ""):match("^@(.*)[/\\][^/\\]+$")
+  or (dt.configuration.config_dir .. "/lua/immich-for-darktable")
+dt.gettext.bindtextdomain(MODULE, SCRIPT_DIR .. "/locale/")
 
---- Translate a message id.
+--- Translate a message id in this script's text domain.
 -- @param msgid string Message id.
 -- @return string Translated text.
 local function _(msgid)
-  return gettext(msgid)
+  return dt.gettext.dgettext(MODULE, msgid)
 end
 
 -- ---------------------------------------------------------------------------
@@ -529,8 +533,8 @@ math.randomseed(os.time())
 
 dt.preferences.register(MODULE, "server_url", "string",
   "Immich search - " .. _("server URL"),
-  _("base URL of the Immich server without trailing slash, e.g. http://silentium:2283"),
-  "http://silentium:2283")
+  _("base URL of the Immich server without trailing slash, e.g. http://immich.local:2283"),
+  "")
 
 dt.preferences.register(MODULE, "api_key", "string",
   "Immich search - " .. _("API key"),
@@ -539,8 +543,8 @@ dt.preferences.register(MODULE, "api_key", "string",
 
 dt.preferences.register(MODULE, "path_map", "string",
   "Immich search - " .. _("path mapping"),
-  _("CONTAINER=HOST pairs separated by ';' that translate Immich's originalPath prefixes into local paths"),
-  "/mnt/media/bilder=/mnt/home2/jgorres/Bilder;/data=/mnt/home2/immich/library")
+  _("CONTAINER=HOST pairs separated by ';' that translate Immich's originalPath prefixes into local paths, e.g. /mnt/media/photos=/home/me/Pictures;/data=/mnt/immich/library"), -- luacheck: ignore 631
+  "")
 
 dt.preferences.register(MODULE, "tag_prefix", "string",
   "Immich search - " .. _("tag prefix"),
@@ -687,7 +691,7 @@ local function parse_path_map(spec)
     end
   end
   if #map == 0 then
-    return nil, _("path mapping is empty")
+    return nil, _("path mapping is not set: enter CONTAINER=HOST pairs in preferences > lua options > Immich search")
   end
   return map
 end
@@ -719,11 +723,17 @@ local function load_settings()
   s.tag_prefix = trim(dt.preferences.read(MODULE, "tag_prefix", "string"))
   s.timeout = dt.preferences.read(MODULE, "timeout", "integer")
 
-  if not s.server_url:match("^https?://[%w%.%-_:%[%]/]+$") then
-    return nil, _("server URL is missing or invalid (expected http(s)://host[:port])")
+  if s.server_url == "" then
+    return nil, _("server URL is not set: enter it in preferences > lua options > Immich search")
   end
-  if s.api_key == "" or s.api_key:find("[%c%s]") then
-    return nil, _("API key is missing or contains whitespace")
+  if not s.server_url:match("^https?://[%w%.%-_:%[%]/]+$") then
+    return nil, _("server URL is invalid (expected http(s)://host[:port])")
+  end
+  if s.api_key == "" then
+    return nil, _("API key is not set: create one in Immich (permission asset.read) and enter it in preferences > lua options > Immich search") -- luacheck: ignore 631
+  end
+  if s.api_key:find("[%c%s]") then
+    return nil, _("API key contains whitespace")
   end
   if s.tag_prefix == "" then
     s.tag_prefix = DEFAULT_TAG_PREFIX

@@ -42,10 +42,15 @@ end
 local dt = {
   configuration = {
     running_os = "linux",
+    config_dir = "/tmp/dt-stub-config",
     tmp_dir = os.getenv("TMPDIR") or "/tmp",
     api_version_string = "9.6.0",
   },
-  gettext = { gettext = function(s) return s end },
+  gettext = {
+    gettext = function(s) return s end,
+    dgettext = function(_domain, s) return s end,
+    bindtextdomain = function(domain, dir) stub.textdomain = { domain = domain, dir = dir } end,
+  },
   preferences = {
     register = function(script, name, _type, _label, _tooltip, default)
       local key = script .. "/" .. name

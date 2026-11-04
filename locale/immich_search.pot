@@ -1,0 +1,287 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Jörn Gorres
+# This file is distributed under the same license as the immich_search package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: immich_search 0.2.0\n"
+"Report-Msgid-Bugs-To: joern@gorres.com\n"
+"POT-Creation-Date: 2026-11-04 11:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: immich_search.lua:511 immich_search.lua:1291
+msgid "Immich search"
+msgstr ""
+
+#: immich_search.lua:512
+msgid "search Immich and show the hits in the lighttable"
+msgstr ""
+
+#: immich_search.lua:535
+msgid "server URL"
+msgstr ""
+
+#: immich_search.lua:536
+msgid ""
+"base URL of the Immich server without trailing slash, e.g. http://"
+"immich.local:2283"
+msgstr ""
+
+#: immich_search.lua:540
+msgid "API key"
+msgstr ""
+
+#: immich_search.lua:541
+msgid ""
+"Immich API key with the permission asset.read (stored unencrypted in "
+"darktablerc)"
+msgstr ""
+
+#: immich_search.lua:545
+msgid "path mapping"
+msgstr ""
+
+#: immich_search.lua:546
+msgid ""
+"CONTAINER=HOST pairs separated by ';' that translate Immich's originalPath "
+"prefixes into local paths, e.g. /mnt/media/photos=/home/me/Pictures;/data=/"
+"mnt/immich/library"
+msgstr ""
+
+#: immich_search.lua:550
+msgid "tag prefix"
+msgstr ""
+
+#: immich_search.lua:551
+msgid "parent tag under which each search result tag is created"
+msgstr ""
+
+#: immich_search.lua:555
+msgid "timeout (seconds)"
+msgstr ""
+
+#: immich_search.lua:556
+msgid "maximum time for one request to the Immich server"
+msgstr ""
+
+#: immich_search.lua:677
+#, lua-format
+msgid "path mapping entry '%s' is not CONTAINER=HOST"
+msgstr ""
+
+#: immich_search.lua:682
+#, lua-format
+msgid "path mapping entry '%s' has an empty side"
+msgstr ""
+
+#: immich_search.lua:685
+#, lua-format
+msgid "path mapping entry '%s' must not contain '..'"
+msgstr ""
+
+#: immich_search.lua:688
+#, lua-format
+msgid "container path '%s' must start with '/'"
+msgstr ""
+
+#: immich_search.lua:694
+msgid ""
+"path mapping is not set: enter CONTAINER=HOST pairs in preferences > lua "
+"options > Immich search"
+msgstr ""
+
+#: immich_search.lua:727
+msgid ""
+"server URL is not set: enter it in preferences > lua options > Immich search"
+msgstr ""
+
+#: immich_search.lua:730
+msgid "server URL is invalid (expected http(s)://host[:port])"
+msgstr ""
+
+#: immich_search.lua:733
+msgid ""
+"API key is not set: create one in Immich (permission asset.read) and enter "
+"it in preferences > lua options > Immich search"
+msgstr ""
+
+#: immich_search.lua:736
+msgid "API key contains whitespace"
+msgstr ""
+
+#: immich_search.lua:763
+msgid ""
+"curl not found; install curl or set its path in preferences > lua options > "
+"executable paths"
+msgstr ""
+
+#: immich_search.lua:816 immich_search.lua:836
+msgid "cannot write a temporary file in darktable's temp directory"
+msgstr ""
+
+#: immich_search.lua:831
+msgid "cannot encode the request as JSON"
+msgstr ""
+
+#: immich_search.lua:866
+msgid "invalid JSON in the server response"
+msgstr ""
+
+#: immich_search.lua:878
+#, lua-format
+msgid "Immich rejected the API key or its permissions (HTTP %d): %s"
+msgstr ""
+
+#: immich_search.lua:880
+#, lua-format
+msgid "Immich error (HTTP %s): %s"
+msgstr ""
+
+#: immich_search.lua:887
+#, lua-format
+msgid "Immich server not reachable: %s"
+msgstr ""
+
+#: immich_search.lua:890
+msgid "curl is too old; version 7.76 or newer is required"
+msgstr ""
+
+#: immich_search.lua:892
+#, lua-format
+msgid "curl failed (exit %d): %s"
+msgstr ""
+
+#: immich_search.lua:913
+msgid "dates must be entered as YYYY-MM-DD"
+msgstr ""
+
+#: immich_search.lua:921
+msgid "enter a search text for the smart search"
+msgstr ""
+
+#: immich_search.lua:1028
+msgid "searching ..."
+msgstr ""
+
+#: immich_search.lua:1044
+msgid "importing Immich results"
+msgstr ""
+
+#: immich_search.lua:1100
+#, lua-format
+msgid "%d of %d hits shown, %d without mapping, %d missing, %d skipped"
+msgstr ""
+
+#: immich_search.lua:1115
+msgid "checking ..."
+msgstr ""
+
+#: immich_search.lua:1128
+#, lua-format
+msgid "Immich %s reachable, but: %s"
+msgstr ""
+
+#: immich_search.lua:1134
+#, lua-format
+msgid "Immich %s reachable, API key accepted"
+msgstr ""
+
+#: immich_search.lua:1146
+msgid "search text (smart) or file name (metadata)"
+msgstr ""
+
+#: immich_search.lua:1147
+msgid ""
+"smart: describe the image content; metadata: part of the file name, case-"
+"insensitive"
+msgstr ""
+
+#: immich_search.lua:1152
+msgid "mode"
+msgstr ""
+
+#: immich_search.lua:1153
+msgid ""
+"smart search uses the image content (CLIP), metadata search uses file name "
+"and filters only"
+msgstr ""
+
+#: immich_search.lua:1155
+msgid "smart (image content)"
+msgstr ""
+
+#: immich_search.lua:1156
+msgid "metadata"
+msgstr ""
+
+#: immich_search.lua:1160
+msgid "taken from (YYYY-MM-DD)"
+msgstr ""
+
+#: immich_search.lua:1165
+msgid "taken until (YYYY-MM-DD)"
+msgstr ""
+
+#: immich_search.lua:1170
+msgid "camera make"
+msgstr ""
+
+#: immich_search.lua:1175
+msgid "camera model"
+msgstr ""
+
+#: immich_search.lua:1180
+msgid "favourites only"
+msgstr ""
+
+#: immich_search.lua:1185
+msgid "rating"
+msgstr ""
+
+#: immich_search.lua:1186
+msgid "exact Immich rating, 'any' disables the filter"
+msgstr ""
+
+#: immich_search.lua:1188
+msgid "any"
+msgstr ""
+
+#: immich_search.lua:1192
+msgid "max. hits"
+msgstr ""
+
+#: immich_search.lua:1193
+msgid "smart search always returns this many hits when enough assets exist"
+msgstr ""
+
+#: immich_search.lua:1204
+msgid "open first hit in the darkroom"
+msgstr ""
+
+#: immich_search.lua:1238
+msgid "search"
+msgstr ""
+
+#: immich_search.lua:1245
+msgid "check connection"
+msgstr ""
+
+#: immich_search.lua:1252
+msgid "restore previous collection"
+msgstr ""
+
+#: immich_search.lua:1263
+msgid "filters"
+msgstr ""
+
+#: immich_search.lua:1271
+msgid "result"
+msgstr ""

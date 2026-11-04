@@ -1,8 +1,8 @@
 # Immich for Darktable – Concept
 
-Version: 0.1.3
+Version: 0.1.4
 Date: 2026-11-04
-Status: implemented as immich_search.lua 0.1.1, GUI acceptance complete
+Status: implemented as immich_search.lua 0.2.0 (generic defaults, German translation)
 
 ## 1. Goal
 
@@ -177,9 +177,9 @@ Settings (darktable preferences, tab Lua options):
 
 | Key | Type | Default | Meaning |
 |---|---|---|---|
-| `server_url` | string | `http://silentium:2283` | without trailing slash |
+| `server_url` | string | empty | without trailing slash; the first search explains where to set it |
 | `api_key` | string | empty | Immich API key (see 8.) |
-| `path_map` | string | `/mnt/media/bilder=/mnt/home2/jgorres/Bilder;/data=/mnt/home2/immich/library` | container prefix=host prefix, several separated by `;` |
+| `path_map` | string | empty | container prefix=host prefix, several separated by `;`; examples live in the README |
 | `tag_prefix` | string | `darktable|immich` | parent path of the result tag |
 | `timeout` | integer | 30 | seconds for curl `--max-time` |
 
@@ -310,15 +310,17 @@ covered by the path mapping tests and the type filter.
 3. **Download mode** for machines without a share: original to
    `download_dir`, then import; with a note that edits stay local.
 4. **Paging** (`nextPage`).
-5. **Translation** de_DE via the lua-scripts mechanism (`gettext`).
+5. ~~Translation de_DE~~ done in 0.2.0: text domain `immich_search` bound
+   to `locale/` next to the script (`dt.gettext.bindtextdomain` +
+   `dgettext`), `.po` and `.mo` in the repository. Plain `dt.gettext.gettext`
+   would look in darktable's own domain and never find script strings.
 
 ## 12. Open points
 
 - Upper bound of the limit (soft 200, hard 500) after measuring import
   duration with RAW files.
-- Generic defaults for server URL and path mapping before the script is
-  shared outside this machine.
-- Translation (de_DE) once the strings are stable.
+- Script manager "install additional scripts" needs a public repository;
+  decide when to publish.
 
 Decided: licence GPL-3.0-or-later; minimum API 9.3.0; API key created
 2026-11-04 with `asset.read` only, stored in `pass` and darktablerc;
@@ -333,3 +335,4 @@ replaced.
 | 0.1.1 | 2026-11-04 | Documentation language switched to English, file renamed to `concept.md` |
 | 0.1.2 | 2026-11-04 | Findings from implementation and first tests: API 9.7.0, `collect.filter`, exact rating, substring file name, SVG hits, 401 body, test harness, licence decided |
 | 0.1.3 | 2026-11-04 | GUI acceptance complete via D-Bus; open first hit fixed (script 0.1.1) |
+| 0.1.4 | 2026-11-04 | Script 0.2.0: empty defaults with hints, German translation via own text domain |
