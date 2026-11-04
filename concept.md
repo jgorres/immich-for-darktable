@@ -1,8 +1,8 @@
 # Immich for Darktable – Concept
 
-Version: 0.1.2
+Version: 0.1.3
 Date: 2026-11-04
-Status: implemented as immich_search.lua 0.1.0, first GUI tests passed
+Status: implemented as immich_search.lua 0.1.1, GUI acceptance complete
 
 ## 1. Goal
 
@@ -152,7 +152,7 @@ Notes:
 | `dt.database.import` | bring hits into the library |
 | `dt.tags.create`, `dt.tags.attach`, `dt.tags.detach` | maintain the result tag |
 | `dt.gui.libs.collect.new_rule` / `filter` | filter the lighttable by tag (`DT_COLLECTION_PROP_TAG`); `filter` returns the previous rules |
-| `dt.gui.views.darkroom.display_image` | open first hit |
+| `dt.gui.selection` + `dt.gui.current_view(darkroom)` | open first hit (`display_image` only works inside the darkroom) |
 | `dt.gui.create_job` | progress, cancel |
 | `dt.print`, `dt.print_log` | status messages, log |
 | `du.check_min_api_version`, `script_data` (destroy/restart) | script manager compliance |
@@ -272,8 +272,20 @@ single file.
 ### 10.2 Acceptance in the darktable GUI (Flatpak)
 
 Start with `flatpak run org.darktable.Darktable -d lua` and read the log.
-State 2026-11-04: cases 1, 4 and 5 passed in the GUI, 2 and 8 in the live
-harness; the rest is open.
+The running instance can be driven over D-Bus, which allows most cases to
+be triggered without clicking:
+
+```
+gdbus call --session --dest org.darktable.service --object-path /darktable \
+  --method org.darktable.service.Remote.Lua 'local dt = require "darktable"; ...'
+```
+
+State 2026-11-04: all cases passed (1, 4, 5 by clicking; 2 and 8 in the
+live harness; 3, 6, 10, 11 over D-Bus; 3 with a closed port and with a
+non-routable address, both reported as "not reachable"). Case 10 first
+failed because `display_image` does nothing outside the darkroom; fixed in
+0.1.1 by selecting the image and switching the view. Cases 7 and 9 are
+covered by the path mapping tests and the type filter.
 
 | No. | Case | Expectation |
 |---|---|---|
@@ -302,8 +314,6 @@ harness; the rest is open.
 
 ## 12. Open points
 
-- Remaining GUI acceptance cases (section 10.2): restore collection,
-  metadata filters, open first hit, script manager stop/start, server down.
 - Upper bound of the limit (soft 200, hard 500) after measuring import
   duration with RAW files.
 - Generic defaults for server URL and path mapping before the script is
@@ -322,3 +332,4 @@ replaced.
 | 0.1.0 | 2026-11-04 | First version after analysing the Flatpak environment and the Immich API v3.3.5 |
 | 0.1.1 | 2026-11-04 | Documentation language switched to English, file renamed to `concept.md` |
 | 0.1.2 | 2026-11-04 | Findings from implementation and first tests: API 9.7.0, `collect.filter`, exact rating, substring file name, SVG hits, 401 body, test harness, licence decided |
+| 0.1.3 | 2026-11-04 | GUI acceptance complete via D-Bus; open first hit fixed (script 0.1.1) |

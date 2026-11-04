@@ -6,7 +6,7 @@ show the hits as a collection and edit the originals in the darkroom.
 darktable works on the original files; edits stay in the XMP sidecars that
 Immich picks up on its next library scan.
 
-Status: 0.1.0, working on the author's setup (darktable 5.6.2 Flatpak,
+Status: 0.1.1, working on the author's setup (darktable 5.6.2 Flatpak,
 Immich v3.3.5). Design notes in `concept.md`.
 
 ## Requirements

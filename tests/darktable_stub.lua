@@ -12,6 +12,8 @@ stub.tags = {}
 stub.imported = {}
 stub.collection_rules = { "ORIGINAL_RULE" }
 stub.displayed = nil
+stub.selection = {}
+stub.view = "lighttable"
 
 local function noop() end
 
@@ -65,8 +67,18 @@ local dt = {
   register_lib = noop,
   register_event = noop,
   gui = {
-    current_view = function() return { id = "lighttable" } end,
-    views = { lighttable = {}, darkroom = { display_image = function(img) stub.displayed = img end } },
+    current_view = function(view)
+      if view then stub.view = view.id end
+      return { id = stub.view }
+    end,
+    selection = function(images)
+      if images then stub.selection = images end
+      return stub.selection
+    end,
+    views = {
+      lighttable = { id = "lighttable" },
+      darkroom = { id = "darkroom", display_image = function(img) stub.displayed = img end },
+    },
     libs = {
       collect = {
         new_rule = function() return {} end,

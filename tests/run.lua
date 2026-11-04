@@ -119,7 +119,9 @@ if live then
   check(#stub.tags["darktable|immich|dog"] == 3, "second search detaches previous hits first")
 
   I.run_search(with({ mode = 2, query = "IMG_2", limit = 2, open_first = true }))
-  check(stub.displayed ~= nil and stub.displayed.path:find("IMG_2", 1, true), "metadata search opens first hit")
+  check(stub.view == "darkroom" and stub.selection[1] and stub.selection[1].path:find("IMG_2", 1, true),
+    "metadata search selects first hit and enters the darkroom")
+  stub.view = "lighttable"
 
   stub.prefs["immich_search/path_map"] = "/nowhere=/tmp"
   I.run_search(with({ query = "dog", limit = 2 }))

@@ -76,7 +76,7 @@ local df = require "lib/dtutils.file"
 local dsys = require "lib/dtutils.system"
 
 local MODULE = "immich_search"
-local VERSION = "0.1.0"
+local VERSION = "0.1.1"
 local MIN_API = "9.3.0"
 
 du.check_min_api_version(MIN_API, MODULE)
@@ -1075,7 +1075,14 @@ local function run_search(p)
   if #images > 0 then
     show_tag_collection(tag_name)
     if p.open_first then
-      dt.gui.views.darkroom.display_image(images[1])
+      -- display_image() only switches images inside the darkroom; from the
+      -- lighttable the first hit is selected and the view is changed.
+      dt.gui.selection({ images[1] })
+      if dt.gui.current_view().id == "darkroom" then
+        dt.gui.views.darkroom.display_image(images[1])
+      else
+        dt.gui.current_view(dt.gui.views.darkroom)
+      end
     end
   end
 
