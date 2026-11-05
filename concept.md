@@ -1,8 +1,8 @@
 # Immich for Darktable – Concept
 
-Version: 0.1.7
+Version: 0.1.9
 Date: 2026-11-05
-Status: implemented as immich_search.lua 0.3.0
+Status: implemented as immich_search.lua 0.3.2
 
 ## 1. Goal
 
@@ -172,10 +172,25 @@ Widget order, top to bottom:
 5. Favourites only (toggle), rating (combobox any/1–5, exact match).
 6. Hits (slider 1–200, default 50).
 7. Open first hit after the search (toggle).
-8. Buttons: "search", "check connection", "restore previous collection".
-   "search" and "check connection" are insensitive while a request runs.
+8. Buttons: "search", "check connection", "restore previous collection",
+   "install status highlight". "search" and "check connection" are
+   insensitive while a request runs and the search button then reads
+   "searching ...".
 9. Status line; after a search it ends with the seconds spent on the
-   server and on the import.
+   server and on the import. Its CSS name is `immich_search_status`,
+   `immich_search_busy` while a request runs. Lua cannot set colours and
+   darktable reads `user.css` only at start-up, so the highlight is an
+   explicit opt-in: "install status highlight" appends a marked block
+   (`/* immich_search: status highlight (begin|end) */`) to `user.css` in
+   the config folder, replaces it when the colour option changed, leaves
+   everything else in the file alone. The switch "modify theme with CSS
+   tweaks" (`themes/usercss`) cannot be set from Lua: `dt.preferences.read
+   ("darktable", key)` reads the core key, but `write` with that script
+   name creates `lua/darktable/<key>` instead (verified 2026-11-05 with
+   5.6.2, first attempt of 0.3.2). The button therefore only writes the
+   file and tells the user to enable the switch in preferences > general;
+   saving that dialog applies `user.css` at once, no restart needed. With
+   the switch already on, a restart (or re-saving the dialog) applies it.
 
 Settings (darktable preferences, tab Lua options):
 
@@ -186,6 +201,7 @@ Settings (darktable preferences, tab Lua options):
 | `path_map` | string | empty | container prefix=host prefix, several separated by `;`; examples live in the README |
 | `tag_prefix` | string | `darktable|immich` | parent path of the result tag |
 | `timeout` | integer | 30 | seconds for curl `--max-time` |
+| `highlight_color` | string | `#f6c90e` | background of the status line while a request runs; `#rgb` or `#rrggbb`, written to `user.css` by "install status highlight" |
 
 The path mapping is validated on every search: every entry needs both
 sides, the container side starts with `/`, `..` is rejected. Download mode
@@ -321,7 +337,9 @@ covered by the path mapping tests and the type filter.
 | 11 | Stop/start the script via script manager | module disappears and returns cleanly |
 | 12 | Smart search, limit 200 (0.3.0) | window stays responsive, "Immich search running ..." then the import progress bar in the left panel, buttons locked, timing in the status line; cancel in the panel stops the import |
 
-Case 12 is pending: it needs a darktable restart with 0.3.0.
+Case 12 passed on 2026-11-05 with 0.3.0 (smart search, 200 hits, window
+stays responsive). The text job in the left panel was found easy to miss,
+hence the button label and the CSS names in 0.3.1.
 
 ## 11. Extensions
 
@@ -364,4 +382,6 @@ replaced.
 | 0.1.4 | 2026-11-04 | Script 0.2.0: empty defaults with hints, German translation via own text domain |
 | 0.1.5 | 2026-11-04 | Script 0.2.1: OCR filter, feature flags in check connection, limit capped at 200 (cross-checked with drolosoft/immich-photo-manager); extensions 2a/2b |
 | 0.1.6 | 2026-11-04 | Script 0.2.2: smart mode without text falls back to the filter search |
+| 0.1.9 | 2026-11-05 | Script 0.3.2: opt-in button "install status highlight" writes a marked CSS block into `user.css`; colour as Lua option; finding: the CSS tweaks switch cannot be set from Lua, the user enables it in preferences > general |
+| 0.1.8 | 2026-11-05 | Script 0.3.1: search button reads "searching ..." while a request runs, status line gets CSS names (`immich_search_status` / `immich_search_busy`) for an optional highlight in the CSS tweaks; case 12 passed |
 | 0.1.7 | 2026-11-05 | Script 0.3.0: search and connection check run in the background thread (`dt.control.dispatch`), text job while the server works, import progress bar now visible and cancellable, buttons locked during a request, timing in the status line; acceptance case 12 |

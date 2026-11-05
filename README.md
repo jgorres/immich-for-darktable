@@ -6,7 +6,7 @@ show the hits as a collection and edit the originals in the darkroom.
 darktable works on the original files; edits stay in the XMP sidecars that
 Immich picks up on its next library scan.
 
-Status: 0.3.0, working on the author's setup (darktable 5.6.2 Flatpak,
+Status: 0.3.2, working on the author's setup (darktable 5.6.2 Flatpak,
 Immich v3.3.5). Design notes in `concept.md`. UI in English and German.
 
 ## Requirements
@@ -48,6 +48,7 @@ only Linux has been tested so far.
    | path mapping | `CONTAINER=HOST;CONTAINER=HOST`, see below (empty by default) |
    | tag prefix | parent tag for result tags, default `darktable\|immich` |
    | timeout | seconds per request, default 30 |
+   | status highlight colour | background of the status line while a request runs, default `#f6c90e`; see below |
 
 ### Path mapping
 
@@ -77,10 +78,40 @@ Lighttable > module "Immich search":
   active before the first search
 - **check connection** verifies server, version and API key and reports
   whether smart search and OCR are enabled on the server
-- while a request runs, the left panel shows a background job ("Immich
-  search running ...", then a progress bar for the import that can be
-  cancelled there), **search** and **check connection** are locked, and the
-  status line ends with the seconds spent on the server and on the import
+- while a request runs, the search button reads **searching ...**, both
+  request buttons are locked and the left panel shows a background job
+  ("Immich search running ...", then a progress bar for the import that
+  can be cancelled there); the status line ends with the seconds spent on
+  the server and on the import
+
+### Optional: highlight the status line
+
+darktable widgets cannot be coloured from Lua, so the highlight is an
+opt-in in two steps:
+
+1. Press **install status highlight** once. The button appends a marked
+   block to `user.css` in the darktable config folder (existing content is
+   kept, the block is replaced when you change the colour option).
+2. Open preferences > general, enable "modify theme with CSS tweaks below"
+   (Lua cannot set this switch) and save. The rule applies at once; if the
+   switch was already on, restart darktable or re-save the dialog.
+
+Afterwards the status line is coloured while a request runs. The block is:
+
+```css
+/* immich_search: status highlight (begin) */
+#immich_search_busy {
+    background-color: #f6c90e;
+    color: #000000;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+/* immich_search: status highlight (end) */
+```
+
+If you prefer to manage `user.css` yourself, paste the rule into the CSS
+field in preferences > general instead; the status line carries the CSS
+names `immich_search_status` (idle) and `immich_search_busy` (running).
 
 Notes: smart search always returns as many hits as requested when enough
 assets exist. The file name filter in metadata mode is a case-insensitive

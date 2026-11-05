@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: immich_search 0.3.0\n"
+"Project-Id-Version: immich_search 0.3.2\n"
 "Report-Msgid-Bugs-To: joern@gorres.com\n"
-"POT-Creation-Date: 2026-11-05 08:12+0100\n"
+"POT-Creation-Date: 2026-11-05 08:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,323 +17,368 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: immich_search.lua:516 immich_search.lua:1417
+#: immich_search.lua:524 immich_search.lua:1542
 msgid "Immich search"
 msgstr ""
 
-#: immich_search.lua:517
+#: immich_search.lua:525
 msgid "search Immich and show the hits in the lighttable"
 msgstr ""
 
-#: immich_search.lua:541
+#: immich_search.lua:549
 msgid "server URL"
 msgstr ""
 
-#: immich_search.lua:542
+#: immich_search.lua:550
 msgid ""
 "base URL of the Immich server without trailing slash, e.g. http://"
 "immich.local:2283"
 msgstr ""
 
-#: immich_search.lua:546
+#: immich_search.lua:554
 msgid "API key"
 msgstr ""
 
-#: immich_search.lua:547
+#: immich_search.lua:555
 msgid ""
 "Immich API key with the permission asset.read (stored unencrypted in "
 "darktablerc)"
 msgstr ""
 
-#: immich_search.lua:551
+#: immich_search.lua:559
 msgid "path mapping"
 msgstr ""
 
-#: immich_search.lua:552
+#: immich_search.lua:560
 msgid ""
 "CONTAINER=HOST pairs separated by ';' that translate Immich's originalPath "
 "prefixes into local paths, e.g. /mnt/media/photos=/home/me/Pictures;/data=/"
 "mnt/immich/library"
 msgstr ""
 
-#: immich_search.lua:556
+#: immich_search.lua:564
 msgid "tag prefix"
 msgstr ""
 
-#: immich_search.lua:557
+#: immich_search.lua:565
 msgid "parent tag under which each search result tag is created"
 msgstr ""
 
-#: immich_search.lua:561
+#: immich_search.lua:569
 msgid "timeout (seconds)"
 msgstr ""
 
-#: immich_search.lua:562
+#: immich_search.lua:570
 msgid "maximum time for one request to the Immich server"
 msgstr ""
 
-#: immich_search.lua:683
+#: immich_search.lua:574
+msgid "status highlight colour"
+msgstr ""
+
+#: immich_search.lua:575
+msgid ""
+"background colour (#rrggbb) of the status line while a request runs; written "
+"to user.css by the button 'install status highlight', needs 'modify theme "
+"with CSS tweaks' in preferences > general"
+msgstr ""
+
+#: immich_search.lua:696
 #, lua-format
 msgid "path mapping entry '%s' is not CONTAINER=HOST"
 msgstr ""
 
-#: immich_search.lua:688
+#: immich_search.lua:701
 #, lua-format
 msgid "path mapping entry '%s' has an empty side"
 msgstr ""
 
-#: immich_search.lua:691
+#: immich_search.lua:704
 #, lua-format
 msgid "path mapping entry '%s' must not contain '..'"
 msgstr ""
 
-#: immich_search.lua:694
+#: immich_search.lua:707
 #, lua-format
 msgid "container path '%s' must start with '/'"
 msgstr ""
 
-#: immich_search.lua:700
+#: immich_search.lua:713
 msgid ""
 "path mapping is not set: enter CONTAINER=HOST pairs in preferences > lua "
 "options > Immich search"
 msgstr ""
 
-#: immich_search.lua:733
+#: immich_search.lua:746
 msgid ""
 "server URL is not set: enter it in preferences > lua options > Immich search"
 msgstr ""
 
-#: immich_search.lua:736
+#: immich_search.lua:749
 msgid "server URL is invalid (expected http(s)://host[:port])"
 msgstr ""
 
-#: immich_search.lua:739
+#: immich_search.lua:752
 msgid ""
 "API key is not set: create one in Immich (permission asset.read) and enter "
 "it in preferences > lua options > Immich search"
 msgstr ""
 
-#: immich_search.lua:742
+#: immich_search.lua:755
 msgid "API key contains whitespace"
 msgstr ""
 
-#: immich_search.lua:769
+#: immich_search.lua:782
 msgid ""
 "curl not found; install curl or set its path in preferences > lua options > "
 "executable paths"
 msgstr ""
 
-#: immich_search.lua:822 immich_search.lua:842
+#: immich_search.lua:835 immich_search.lua:855
 msgid "cannot write a temporary file in darktable's temp directory"
 msgstr ""
 
-#: immich_search.lua:837
+#: immich_search.lua:850
 msgid "cannot encode the request as JSON"
 msgstr ""
 
-#: immich_search.lua:872
+#: immich_search.lua:885
 msgid "invalid JSON in the server response"
 msgstr ""
 
-#: immich_search.lua:884
+#: immich_search.lua:897
 #, lua-format
 msgid "Immich rejected the API key or its permissions (HTTP %d): %s"
 msgstr ""
 
-#: immich_search.lua:886
+#: immich_search.lua:899
 #, lua-format
 msgid "Immich error (HTTP %s): %s"
 msgstr ""
 
-#: immich_search.lua:893
+#: immich_search.lua:906
 #, lua-format
 msgid "Immich server not reachable: %s"
 msgstr ""
 
-#: immich_search.lua:896
+#: immich_search.lua:909
 msgid "curl is too old; version 7.76 or newer is required"
 msgstr ""
 
-#: immich_search.lua:898
+#: immich_search.lua:911
 #, lua-format
 msgid "curl failed (exit %d): %s"
 msgstr ""
 
-#: immich_search.lua:931
+#: immich_search.lua:944
 msgid "dates must be entered as YYYY-MM-DD"
 msgstr ""
 
-#: immich_search.lua:939
+#: immich_search.lua:952
 msgid ""
 "enter a search text in the top field for the smart search, or set a filter"
 msgstr ""
 
-#: immich_search.lua:1052
+#: immich_search.lua:1065
 msgid "a request is already running"
 msgstr ""
 
-#: immich_search.lua:1061
+#: immich_search.lua:1074
 #, lua-format
 msgid "internal error: %s"
 msgstr ""
 
-#: immich_search.lua:1089
+#: immich_search.lua:1102 immich_search.lua:1395
 msgid "searching ..."
 msgstr ""
 
-#: immich_search.lua:1090
+#: immich_search.lua:1103
 msgid "searching Immich ..."
 msgstr ""
 
-#: immich_search.lua:1094
+#: immich_search.lua:1107
 msgid "Immich search running ..."
 msgstr ""
 
-#: immich_search.lua:1114
+#: immich_search.lua:1127
 msgid "importing Immich results"
 msgstr ""
 
-#: immich_search.lua:1173
+#: immich_search.lua:1186
 #, lua-format
 msgid "server %d s, import %d s"
 msgstr ""
 
-#: immich_search.lua:1175
+#: immich_search.lua:1188
 #, lua-format
 msgid "%d of %d hits shown, %d without mapping, %d missing, %d skipped"
 msgstr ""
 
-#: immich_search.lua:1178
+#: immich_search.lua:1191
 msgid "no search text: filter search"
 msgstr ""
 
-#: immich_search.lua:1202
+#: immich_search.lua:1215
 msgid "checking ..."
 msgstr ""
 
-#: immich_search.lua:1215
+#: immich_search.lua:1228
 #, lua-format
 msgid "Immich %s reachable, but: %s"
 msgstr ""
 
-#: immich_search.lua:1221
+#: immich_search.lua:1234
 #, lua-format
 msgid "Immich %s reachable, API key accepted"
 msgstr ""
 
-#: immich_search.lua:1229
+#: immich_search.lua:1242
 msgid "on"
 msgstr ""
 
-#: immich_search.lua:1229
+#: immich_search.lua:1242
 msgid "off"
 msgstr ""
 
-#: immich_search.lua:1232
+#: immich_search.lua:1245
 msgid "smart search"
 msgstr ""
 
-#: immich_search.lua:1232
+#: immich_search.lua:1245
 msgid "OCR"
 msgstr ""
 
-#: immich_search.lua:1251
+#: immich_search.lua:1264
 msgid "search text (smart) or file name (metadata)"
 msgstr ""
 
-#: immich_search.lua:1252
+#: immich_search.lua:1265
 msgid ""
 "smart: describe the image content; metadata: part of the file name, case-"
 "insensitive"
 msgstr ""
 
-#: immich_search.lua:1257
+#: immich_search.lua:1270
 msgid "mode"
 msgstr ""
 
-#: immich_search.lua:1258
+#: immich_search.lua:1271
 msgid ""
 "smart search uses the image content (CLIP), metadata search uses file name "
 "and filters only"
 msgstr ""
 
-#: immich_search.lua:1260
+#: immich_search.lua:1273
 msgid "smart (image content)"
 msgstr ""
 
-#: immich_search.lua:1261
+#: immich_search.lua:1274
 msgid "metadata"
 msgstr ""
 
-#: immich_search.lua:1265
+#: immich_search.lua:1278
 msgid "taken from (YYYY-MM-DD)"
 msgstr ""
 
-#: immich_search.lua:1270
+#: immich_search.lua:1283
 msgid "taken until (YYYY-MM-DD)"
 msgstr ""
 
-#: immich_search.lua:1275
+#: immich_search.lua:1288
 msgid "camera make"
 msgstr ""
 
-#: immich_search.lua:1280
+#: immich_search.lua:1293
 msgid "camera model"
 msgstr ""
 
-#: immich_search.lua:1285
+#: immich_search.lua:1298
 msgid "text in the image (OCR)"
 msgstr ""
 
-#: immich_search.lua:1286
+#: immich_search.lua:1299
 msgid ""
 "matches text recognised inside the images; needs OCR enabled on the server"
 msgstr ""
 
-#: immich_search.lua:1291
+#: immich_search.lua:1304
 msgid "favourites only"
 msgstr ""
 
-#: immich_search.lua:1296
+#: immich_search.lua:1309
 msgid "rating"
 msgstr ""
 
-#: immich_search.lua:1297
+#: immich_search.lua:1310
 msgid "exact Immich rating, 'any' disables the filter"
 msgstr ""
 
-#: immich_search.lua:1299
+#: immich_search.lua:1312
 msgid "any"
 msgstr ""
 
-#: immich_search.lua:1303
+#: immich_search.lua:1316
 msgid "max. hits"
 msgstr ""
 
-#: immich_search.lua:1304
+#: immich_search.lua:1317
 msgid "smart search always returns this many hits when enough assets exist"
 msgstr ""
 
-#: immich_search.lua:1315
+#: immich_search.lua:1328
 msgid "open first hit in the darkroom"
 msgstr ""
 
-#: immich_search.lua:1350
+#: immich_search.lua:1369 immich_search.lua:1395
 msgid "search"
 msgstr ""
 
-#: immich_search.lua:1363
+#: immich_search.lua:1382
 msgid "check connection"
 msgstr ""
 
-#: immich_search.lua:1377
+#: immich_search.lua:1400
 msgid "restore previous collection"
 msgstr ""
 
-#: immich_search.lua:1388
+#: immich_search.lua:1446
+#, lua-format
+msgid "status highlight colour must be a hex value like %s"
+msgstr ""
+
+#: immich_search.lua:1463
+msgid "status highlight is already installed"
+msgstr ""
+
+#: immich_search.lua:1481
+#, lua-format
+msgid "cannot write %s"
+msgstr ""
+
+#: immich_search.lua:1492
+msgid "status highlight written to user.css; restart darktable to apply"
+msgstr ""
+
+#: immich_search.lua:1494
+msgid ""
+"status highlight written to user.css; enable 'modify theme with CSS tweaks' "
+"in preferences > general and save, it applies at once"
+msgstr ""
+
+#: immich_search.lua:1501
+msgid "install status highlight"
+msgstr ""
+
+#: immich_search.lua:1502
+msgid ""
+"writes a CSS rule into user.css that colours the status line while a request "
+"runs; needs 'modify theme with CSS tweaks' in preferences > general"
+msgstr ""
+
+#: immich_search.lua:1512
 msgid "filters"
 msgstr ""
 
-#: immich_search.lua:1397
+#: immich_search.lua:1521
 msgid "result"
 msgstr ""

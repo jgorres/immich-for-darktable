@@ -125,12 +125,83 @@ check(stub.log[#stub.log] == "a request is already running", "second start while
 I.state.busy = false
 
 local real_read = stub.dt.preferences.read
-stub.dt.preferences.read = function() error("boom") end
+local seen_busy = {}
+stub.dt.preferences.read = function()
+  seen_busy = { label = I.widgets.search.label, name = I.widgets.status.name, sensitive = I.widgets.search.sensitive }
+  error("boom")
+end
 I.widgets.check.clicked_callback()
 stub.dt.preferences.read = real_read
+check(seen_busy.label == "searching ..." and seen_busy.name == "immich_search_busy" and seen_busy.sensitive == false,
+  "while a request runs the search button reads 'searching ...' and the status line is named immich_search_busy")
+check(I.widgets.search.label == "search" and I.widgets.status.name == "immich_search_status",
+  "button label and status name are restored afterwards")
 check(I.widgets.status.label:find("internal error", 1, true) and I.widgets.status.label:find("boom", 1, true),
   "Lua error inside the worker is reported: " .. I.widgets.status.label)
 check(I.widgets.search.sensitive == true and I.state.busy == false, "buttons are unlocked after an internal error")
+
+-- status highlight installer (writes user.css in a throw-away folder) -----
+local css_dir = os.tmpname()
+os.remove(css_dir)
+os.execute("mkdir -p '" .. css_dir .. "'")
+local real_config_dir = stub.dt.configuration.config_dir
+stub.dt.configuration.config_dir = css_dir
+local css_path = css_dir .. "/user.css"
+local function read_css()
+  local f = io.open(css_path, "rb")
+  if not f then return nil end
+  local c = f:read("a")
+  f:close()
+  return c
+end
+local function count(text, needle)
+  local n, pos = 0, 1
+  while true do
+    local b, e = text:find(needle, pos, true)
+    if not b then return n end
+    n, pos = n + 1, e + 1
+  end
+end
+
+local f = assert(io.open(css_path, "wb"))
+f:write("/* mine */\nbody { margin: 0; }")
+f:close()
+
+stub.prefs["darktable/themes/usercss"] = false
+I.install_highlight()
+local css = read_css()
+check(I.widgets.status.label:find("enable 'modify theme with CSS tweaks'", 1, true),
+  "first install with the switch off points to the preferences: " .. I.widgets.status.label)
+check(css:find("/* mine */\nbody { margin: 0; }\n\n/* immich_search: status highlight (begin) */", 1, true) ~= nil,
+  "existing user.css content is kept and the block appended")
+check(css:find("#immich_search_busy {\n    background-color: #f6c90e;", 1, true) ~= nil, "default colour written")
+check(stub.prefs["darktable/themes/usercss"] == false, "script does not try to set the core switch")
+
+I.install_highlight()
+check(I.widgets.status.label:find("enable 'modify theme", 1, true) and read_css() == css,
+  "with the switch still off the hint is repeated, file unchanged")
+
+stub.prefs["darktable/themes/usercss"] = true
+I.install_highlight()
+check(I.widgets.status.label == "status highlight is already installed" and read_css() == css,
+  "with the switch on and the block present nothing changes")
+
+stub.prefs["immich_search/highlight_color"] = "#FFCC00"
+I.install_highlight()
+css = read_css()
+check(count(css, "status highlight (begin)") == 1 and css:find("background-color: #ffcc00;", 1, true) ~= nil,
+  "colour change replaces the block in place")
+check(I.widgets.status.label:find("restart darktable", 1, true), "with the switch on a restart is requested: " .. I.widgets.status.label)
+check(css:find("/* mine */", 1, true) == 1, "other content still first")
+
+stub.prefs["immich_search/highlight_color"] = "yellow"
+I.install_highlight()
+check(I.widgets.status.label:find("hex value", 1, true) and read_css() == css, "invalid colour is rejected without writing")
+
+stub.prefs["immich_search/highlight_color"] = "#f6c90e"
+stub.prefs["darktable/themes/usercss"] = nil
+stub.dt.configuration.config_dir = real_config_dir
+os.execute("rm -rf '" .. css_dir .. "'")
 
 -- live -----------------------------------------------------------------------
 if live then

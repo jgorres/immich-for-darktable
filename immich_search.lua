@@ -54,8 +54,16 @@
     "search"; the lighttable then shows the hits as a collection
   * while Immich searches and darktable imports, the left panel shows a
     background job; the import can be cancelled there, the two request
-    buttons are locked meanwhile and the status line ends with the time
-    spent on the server and on the import
+    buttons are locked meanwhile, the search button reads "searching ..."
+    and the status line ends with the time spent on the server and on the
+    import
+  * "install status highlight" (opt-in) writes a CSS rule into user.css
+    that colours the status line while a request runs; the colour is a
+    Lua option. The switch "modify theme with CSS tweaks" in
+    preferences > general has to be enabled by hand (Lua cannot set it);
+    saving that dialog applies the rule at once. The status line carries
+    the CSS name immich_search_status, while a request runs
+    immich_search_busy.
   * "restore previous collection" brings back the collection that was
     active before the first Immich search
   * "check connection" verifies server, version and API key
@@ -81,7 +89,7 @@ local df = require "lib/dtutils.file"
 local dsys = require "lib/dtutils.system"
 
 local MODULE = "immich_search"
-local VERSION = "0.3.0"
+local VERSION = "0.3.2"
 local MIN_API = "9.3.0"
 
 du.check_min_api_version(MIN_API, MODULE)
@@ -561,6 +569,11 @@ dt.preferences.register(MODULE, "timeout", "integer",
   "Immich search - " .. _("timeout (seconds)"),
   _("maximum time for one request to the Immich server"),
   30, 5, 300)
+
+dt.preferences.register(MODULE, "highlight_color", "string",
+  "Immich search - " .. _("status highlight colour"),
+  _("background colour (#rrggbb) of the status line while a request runs; written to user.css by the button 'install status highlight', needs 'modify theme with CSS tweaks' in preferences > general"), -- luacheck: ignore 631
+  "#f6c90e")
 
 -- ---------------------------------------------------------------------------
 -- Small helpers
@@ -1316,10 +1329,16 @@ W.open_first = dt.new_widget("check_button") {
   value = false,
 }
 
+-- CSS names of the status line: idle and while a request runs. Users can
+-- colour them in darktable's CSS tweaks, e.g. #immich_search_busy {...}.
+local STATUS_NAME_IDLE = "immich_search_status"
+local STATUS_NAME_BUSY = "immich_search_busy"
+
 W.status = dt.new_widget("label") {
   label = "",
   ellipsize = "end",
   halign = "start",
+  name = STATUS_NAME_IDLE,
 }
 
 --- Write a text to the status label.
@@ -1366,11 +1385,15 @@ W.check = dt.new_widget("button") {
   end,
 }
 
---- Lock or unlock the two buttons that start a request.
+--- Lock or unlock the two buttons that start a request and make the busy
+-- state visible: the search button reads "searching ..." and the status
+-- line switches its CSS name so a user style can highlight it.
 -- @param busy boolean True while a request runs.
 set_busy = function(busy)
   W.search.sensitive = not busy
   W.check.sensitive = not busy
+  W.search.label = busy and _("searching ...") or _("search")
+  W.status.name = busy and STATUS_NAME_BUSY or STATUS_NAME_IDLE
 end
 
 W.restore = dt.new_widget("button") {
@@ -1378,6 +1401,107 @@ W.restore = dt.new_widget("button") {
   clicked_callback = function()
     restore_collection()
     set_status("")
+  end,
+}
+
+-- ---------------------------------------------------------------------------
+-- Status highlight (optional CSS rule in user.css)
+-- ---------------------------------------------------------------------------
+
+-- Markers around the block this script maintains in user.css. Everything
+-- outside the markers is left untouched.
+local CSS_MARK_BEGIN = "/* immich_search: status highlight (begin) */"
+local CSS_MARK_END = "/* immich_search: status highlight (end) */"
+local DEFAULT_HIGHLIGHT = "#f6c90e"
+
+--- CSS block that colours the status line while a request runs.
+-- @param colour string Background colour as #rgb or #rrggbb.
+-- @return string CSS text including both markers, without trailing newline.
+local function highlight_css(colour)
+  return table.concat({
+    CSS_MARK_BEGIN,
+    "#" .. STATUS_NAME_BUSY .. " {",
+    "    background-color: " .. colour .. ";",
+    "    color: #000000;",
+    "    padding: 2px 6px;",
+    "    border-radius: 3px;",
+    "}",
+    CSS_MARK_END,
+  }, "\n")
+end
+
+--- Write the highlight rule into user.css.
+-- Lua cannot load CSS at runtime, so this is an explicit opt-in (button).
+-- Idempotent: an existing block is replaced when the colour changed and
+-- left alone otherwise; all other content of user.css stays. The switch
+-- "modify theme with CSS tweaks" (themes/usercss) cannot be set from Lua:
+-- dt.preferences.write("darktable", ...) lands in the Lua namespace, not
+-- in the core key (verified with darktable 5.6.2); only reading works.
+local function install_highlight()
+  local colour = trim(dt.preferences.read(MODULE, "highlight_color", "string")):lower()
+  if colour == "" then
+    colour = DEFAULT_HIGHLIGHT
+  end
+  if not (colour:match("^#%x%x%x%x%x%x$") or colour:match("^#%x%x%x$")) then
+    local msg = string.format(_("status highlight colour must be a hex value like %s"), DEFAULT_HIGHLIGHT)
+    set_status(msg)
+    dt.print(msg)
+    return
+  end
+
+  local path = dt.configuration.config_dir .. PS .. "user.css"
+  local existing = read_file(path) or ""
+  local block = highlight_css(colour)
+  local tweaks_on = dt.preferences.read("darktable", "themes/usercss", "bool") and true or false
+
+  local updated
+  local b = existing:find(CSS_MARK_BEGIN, 1, true)
+  local e = b and existing:find(CSS_MARK_END, b, true)
+  if b and e then
+    e = e + #CSS_MARK_END - 1
+    if existing:sub(b, e) == block and tweaks_on then
+      local msg = _("status highlight is already installed")
+      set_status(msg)
+      dt.print(msg)
+      return
+    end
+    updated = existing:sub(1, b - 1) .. block .. existing:sub(e + 1)
+  else
+    local prefix = existing
+    if prefix ~= "" and prefix:sub(-1) ~= "\n" then
+      prefix = prefix .. "\n"
+    end
+    if prefix ~= "" then
+      prefix = prefix .. "\n"
+    end
+    updated = prefix .. block .. "\n"
+  end
+
+  if updated ~= existing and not write_file(path, updated) then
+    local msg = string.format(_("cannot write %s"), path)
+    set_status(msg)
+    dt.print(msg)
+    return
+  end
+  dt.print_log(MODULE .. ": status highlight written to " .. path)
+
+  -- The preferences dialog applies user.css as soon as it is saved, so
+  -- with the switch still off no restart is needed on that route.
+  local msg
+  if tweaks_on then
+    msg = _("status highlight written to user.css; restart darktable to apply")
+  else
+    msg = _("status highlight written to user.css; enable 'modify theme with CSS tweaks' in preferences > general and save, it applies at once") -- luacheck: ignore 631
+  end
+  set_status(msg)
+  dt.print(msg)
+end
+
+W.highlight = dt.new_widget("button") {
+  label = _("install status highlight"),
+  tooltip = _("writes a CSS rule into user.css that colours the status line while a request runs; needs 'modify theme with CSS tweaks' in preferences > general"), -- luacheck: ignore 631
+  clicked_callback = function()
+    install_highlight()
   end,
 }
 
@@ -1402,6 +1526,7 @@ W.box = dt.new_widget("box") {
     W.check,
   },
   W.restore,
+  W.highlight,
   W.status,
 }
 
@@ -1464,6 +1589,7 @@ script_data.internal = {
   api_request = api_request,
   run_search = run_search,
   check_connection = check_connection,
+  install_highlight = install_highlight,
   widgets = W,
   state = state,
 }
