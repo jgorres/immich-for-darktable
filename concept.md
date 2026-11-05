@@ -1,6 +1,6 @@
 # Immich for Darktable – Concept
 
-Version: 0.1.9
+Version: 0.1.10
 Date: 2026-11-05
 Status: implemented as immich_search.lua 0.3.2
 
@@ -263,21 +263,25 @@ so the module never stays locked.
 
 ## 9. Repository and installation
 
-Location: `~/dev-silentium/immich-for-darktable`, GitHub `jgorres/immich-for-darktable` (private).
+Location: `~/dev-silentium/immich-for-darktable`, GitHub
+`jgorres/immich-for-darktable`, public since 2026-11-05.
 
 ```
 immich-for-darktable/
 ├── immich_search.lua        script (single file, JSON parser embedded)
 ├── tests/run.lua            test harness: lua5.4 tests/run.lua [--live]
 ├── tests/darktable_stub.lua minimal stand-in for the darktable Lua API
+├── locale/                  immich_search.pot, de_DE/LC_MESSAGES/*.po|mo
 ├── .luacheckrc
+├── LICENSE                  GPL-3.0 text
 ├── concept.md
 ├── README.md
-└── docs/                    screenshots, manual (later)
+└── docs/                    blog post draft; screenshots, manual (later)
 ```
 
-Licence: GPL-3.0-or-later (header in the script), because the helpers from
-darktable/lua-scripts are GPL-3.0. The embedded json.lua is MIT.
+Licence: GPL-3.0-or-later (header in the script, full text in `LICENSE`),
+because the helpers from darktable/lua-scripts are GPL-3.0. The embedded
+json.lua is MIT.
 
 Development on silentium: symlink
 `~/.var/app/org.darktable.Darktable/config/darktable/lua/immich-for-darktable`
@@ -285,9 +289,9 @@ to the repository; the script manager lists the file as its own category
 and can start, stop and reload it. Alternatively in `luarc`:
 `require "immich-for-darktable/immich_search"`.
 
-Distribution later: script manager, action "install additional scripts"
-with the repository URL (requires a public repository), or a copy of the
-single file.
+Distribution: script manager, action "install additional scripts" with
+the repository URL (possible since the repository is public), or a copy of
+the script together with `locale/`.
 
 ## 10. Tests
 
@@ -363,13 +367,15 @@ hence the button label and the CSS names in 0.3.1.
 
 ## 12. Open points
 
-- Script manager "install additional scripts" needs a public repository;
-  decide when to publish.
+- Screenshots for the blog post (`docs/`), then publish the post.
+- Extensions from section 11 as needed.
 
 Decided: licence GPL-3.0-or-later; minimum API 9.3.0; API key created
 2026-11-04 with `asset.read` only, stored in `pass` and darktablerc;
 umlauts are kept in tag names, only `|` and control characters are
-replaced.
+replaced; repository made public on 2026-11-05 after a scan of the whole
+history for secrets (none; host name and paths of the author appear only
+in the live test and as README examples).
 
 ## 13. Changes
 
@@ -382,6 +388,7 @@ replaced.
 | 0.1.4 | 2026-11-04 | Script 0.2.0: empty defaults with hints, German translation via own text domain |
 | 0.1.5 | 2026-11-04 | Script 0.2.1: OCR filter, feature flags in check connection, limit capped at 200 (cross-checked with drolosoft/immich-photo-manager); extensions 2a/2b |
 | 0.1.6 | 2026-11-04 | Script 0.2.2: smart mode without text falls back to the filter search |
+| 0.1.10 | 2026-11-05 | Repository public with `LICENSE`; sections 9 and 12 updated, open points now screenshots and extensions |
 | 0.1.9 | 2026-11-05 | Script 0.3.2: opt-in button "install status highlight" writes a marked CSS block into `user.css`; colour as Lua option; finding: the CSS tweaks switch cannot be set from Lua, the user enables it in preferences > general |
 | 0.1.8 | 2026-11-05 | Script 0.3.1: search button reads "searching ..." while a request runs, status line gets CSS names (`immich_search_status` / `immich_search_busy`) for an optional highlight in the CSS tweaks; case 12 passed |
 | 0.1.7 | 2026-11-05 | Script 0.3.0: search and connection check run in the background thread (`dt.control.dispatch`), text job while the server works, import progress bar now visible and cancellable, buttons locked during a request, timing in the status line; acceptance case 12 |
