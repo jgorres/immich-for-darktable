@@ -1,8 +1,8 @@
 # Immich for Darktable – Concept
 
-Version: 0.1.6
-Date: 2026-11-04
-Status: implemented as immich_search.lua 0.2.2
+Version: 0.1.7
+Date: 2026-11-05
+Status: implemented as immich_search.lua 0.3.0
 
 ## 1. Goal
 
@@ -154,7 +154,8 @@ Notes:
 | `dt.tags.create`, `dt.tags.attach`, `dt.tags.detach` | maintain the result tag |
 | `dt.gui.libs.collect.new_rule` / `filter` | filter the lighttable by tag (`DT_COLLECTION_PROP_TAG`); `filter` returns the previous rules |
 | `dt.gui.selection` + `dt.gui.current_view(darkroom)` | open first hit (`display_image` only works inside the darkroom) |
-| `dt.gui.create_job` | progress, cancel |
+| `dt.gui.create_job` | text-only job in the left panel while the server works; progress bar with cancel during the import |
+| `dt.control.dispatch` | runs search and connection check in darktable's Lua background thread; the button callbacks only read the widgets |
 | `dt.print`, `dt.print_log` | status messages, log |
 | `du.check_min_api_version`, `script_data` (destroy/restart) | script manager compliance |
 
@@ -172,7 +173,9 @@ Widget order, top to bottom:
 6. Hits (slider 1–200, default 50).
 7. Open first hit after the search (toggle).
 8. Buttons: "search", "check connection", "restore previous collection".
-9. Status line.
+   "search" and "check connection" are insensitive while a request runs.
+9. Status line; after a search it ends with the seconds spent on the
+   server and on the import.
 
 Settings (darktable preferences, tab Lua options):
 
@@ -191,6 +194,14 @@ prefix are counted and reported in the status line.
 
 ## 7. Search flow
 
+The button callback reads the widget values on the GTK thread and hands
+the rest to `dt.control.dispatch`, so it runs in darktable's Lua
+background thread and the interface keeps redrawing (a blocking curl in
+the callback froze the whole window, which looked like a crash with 200
+hits). A module-level busy flag rejects a second start, the two request
+buttons are locked meanwhile, and a Lua error inside the worker is caught
+so the module never stays locked.
+
 1. Validate settings (URL, key, curl present); on error show a message, no
    request. Smart mode without a search text uses the metadata endpoint when
    at least one filter is set (status line: "no search text: filter search")
@@ -199,17 +210,22 @@ prefix are counted and reported in the status line.
    embedded encoder and write it to a temporary file; write a header file
    with `x-api-key`, `Content-Type`, `Accept`.
 3. Run curl: `--silent --show-error --fail-with-body --max-time N
-   -H @header --data @body -o response URL`. No `--insecure`.
+   -H @header --data @body -o response URL`. No `--insecure`. A text-only
+   background job "Immich search running ..." is shown meanwhile (no
+   cancel: curl cannot be interrupted from Lua).
 4. Evaluate exit code and HTTP status; report 401/403 as "API key or
    permissions", 0/7/28 as "server not reachable".
 5. Parse the response, filter items (type, offline), map paths.
 6. Create the result tag `<tag_prefix>|<sanitised query>` (pipes and control
    characters replaced, at most 60 characters); detach it from images that
    still carry it so the collection shows only the current result.
-7. Per hit: `dt.database.import`, attach tag, report progress.
+7. Per hit: `dt.database.import`, attach tag, report progress in a
+   background job with progress bar; its cancel button stops the loop.
 8. Set the collection rule (mode AND, item TAG, data = tag path); the rules
    active before the first search are kept for "restore previous collection".
-9. Status line and `dt.print` with counters; optionally open the first hit.
+9. Status line and `dt.print` with counters and the seconds spent on the
+   server and on the import (`os.time()`, one-second resolution; also
+   logged); optionally open the first hit.
 10. Delete temporary files, also on error.
 
 ## 8. Security
@@ -303,6 +319,9 @@ covered by the path mapping tests and the type filter.
 | 9 | Video in the result | filtered out |
 | 10 | "Open first hit" | darkroom opens |
 | 11 | Stop/start the script via script manager | module disappears and returns cleanly |
+| 12 | Smart search, limit 200 (0.3.0) | window stays responsive, "Immich search running ..." then the import progress bar in the left panel, buttons locked, timing in the status line; cancel in the panel stops the import |
+
+Case 12 is pending: it needs a darktable restart with 0.3.0.
 
 ## 11. Extensions
 
@@ -345,3 +364,4 @@ replaced.
 | 0.1.4 | 2026-11-04 | Script 0.2.0: empty defaults with hints, German translation via own text domain |
 | 0.1.5 | 2026-11-04 | Script 0.2.1: OCR filter, feature flags in check connection, limit capped at 200 (cross-checked with drolosoft/immich-photo-manager); extensions 2a/2b |
 | 0.1.6 | 2026-11-04 | Script 0.2.2: smart mode without text falls back to the filter search |
+| 0.1.7 | 2026-11-05 | Script 0.3.0: search and connection check run in the background thread (`dt.control.dispatch`), text job while the server works, import progress bar now visible and cancellable, buttons locked during a request, timing in the status line; acceptance case 12 |

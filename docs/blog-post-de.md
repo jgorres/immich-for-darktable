@@ -48,6 +48,8 @@ Der Button „Verbindung prüfen“ meldet danach Serverversion, Gültigkeit des
 
 Die Smart-Suche liefert immer so viele Treffer wie angefordert, eine Trefferschwelle kennt Immich nicht. Das Limit steht darum sichtbar im Modul, voreingestellt auf 50. Dateien, die Darktable nicht importieren kann, etwa SVG-Grafiken, werden gezählt und übersprungen.
 
+Bei 200 Treffern dauert eine Suche spürbar. Damit das nicht wie ein Absturz wirkt, zeigt das linke Panel von Darktable währenddessen einen Hintergrundauftrag: erst „Immich-Suche läuft …“, dann einen Fortschrittsbalken für den Import, der sich dort auch abbrechen lässt. Die Statuszeile nennt zum Schluss, wie viele Sekunden auf den Server und wie viele auf den Import entfielen.
+
 Auf der Liste für die nächsten Versionen stehen der Rückweg „in Immich zeigen“ für das gewählte Bild, die Suche nach ähnlichen Bildern über Immichs Bildvergleich, Ortsfilter sowie Auswahllisten für Personen, Alben und Tags.
 
 ## Code und Mitmachen

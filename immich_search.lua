@@ -52,6 +52,10 @@
   * enter a search text, choose the mode, optionally set filters (date,
     camera, text recognised in the image, favourites, rating), press
     "search"; the lighttable then shows the hits as a collection
+  * while Immich searches and darktable imports, the left panel shows a
+    background job; the import can be cancelled there, the two request
+    buttons are locked meanwhile and the status line ends with the time
+    spent on the server and on the import
   * "restore previous collection" brings back the collection that was
     active before the first Immich search
   * "check connection" verifies server, version and API key
@@ -77,7 +81,7 @@ local df = require "lib/dtutils.file"
 local dsys = require "lib/dtutils.system"
 
 local MODULE = "immich_search"
-local VERSION = "0.2.2"
+local VERSION = "0.3.0"
 local MIN_API = "9.3.0"
 
 du.check_min_api_version(MIN_API, MODULE)
@@ -524,6 +528,7 @@ script_data.show = nil
 local state = {
   module_installed = false,
   previous_rules = nil,
+  busy = false,
 }
 
 math.randomseed(os.time())
@@ -1024,12 +1029,49 @@ local function restore_collection()
   end
 end
 
--- Forward declaration, assigned after the widgets exist.
+-- Forward declarations, assigned after the widgets exist.
 local set_status
+local set_busy
 
---- Run a search and import, tag and show the hits.
+--- Whole seconds since a reading of os.time().
+-- os.time() is the only portable wall clock in darktable's Lua; its
+-- resolution is one second, which is enough to tell server from import time.
+-- @param since number Start time from os.time().
+-- @return number Elapsed seconds, never negative.
+local function seconds_since(since)
+  return math.max(0, math.floor(os.difftime(os.time(), since)))
+end
+
+--- Run a worker exactly once at a time with the request buttons locked.
+-- A Lua error inside the worker is caught so that the module never stays
+-- locked; the error is shown in the status line and logged.
+-- @param worker function Function doing the work.
+-- @param ... any Arguments for the worker.
+local function run_guarded(worker, ...)
+  if state.busy then
+    dt.print(_("a request is already running"))
+    return
+  end
+  state.busy = true
+  set_busy(true)
+  local ok, err = pcall(worker, ...)
+  set_busy(false)
+  state.busy = false
+  if not ok then
+    local msg = string.format(_("internal error: %s"), tostring(err))
+    set_status(msg)
+    dt.print(msg)
+    dt.print_log(MODULE .. ": " .. msg)
+  end
+end
+
+--- Search Immich, import the hits, tag and show them.
+-- Runs in darktable's Lua background thread (see the button callbacks), so
+-- the interface keeps redrawing while curl waits for the server and while
+-- the hits are imported; GUI calls are marshalled to the GTK thread by
+-- darktable itself.
 -- @param p table Parameters read from the widgets.
-local function run_search(p)
+local function search_worker(p)
   local settings, serr = load_settings()
   if not settings then
     set_status(serr)
@@ -1045,7 +1087,16 @@ local function run_search(p)
   end
 
   set_status(_("searching ..."))
+  dt.print(_("searching Immich ..."))
+
+  -- Text-only background job in the left panel while the server works.
+  -- No cancel callback: a running curl cannot be interrupted from here.
+  local search_job = dt.gui.create_job(_("Immich search running ..."), false)
+  local request_start = os.time()
   local data, rerr = api_request(settings, endpoint, body)
+  local request_seconds = seconds_since(request_start)
+  search_job.valid = false
+
   if not data then
     set_status(rerr)
     dt.print(rerr)
@@ -1066,6 +1117,7 @@ local function run_search(p)
 
   local images = {}
   local skipped = { unmapped = 0, missing = 0, other = 0 }
+  local import_start = os.time()
 
   for i, item in ipairs(items) do
     if not job.valid then
@@ -1100,6 +1152,7 @@ local function run_search(p)
   if job.valid then
     job.valid = false
   end
+  local import_seconds = seconds_since(import_start)
 
   if #images > 0 then
     show_tag_collection(tag_name)
@@ -1115,18 +1168,30 @@ local function run_search(p)
     end
   end
 
+  -- The timing tells where a slow search spends its time: on the server
+  -- (CLIP search) or in darktable (import and tagging of the hits).
+  local timing = string.format(_("server %d s, import %d s"), request_seconds, import_seconds)
   local status = string.format(
     _("%d of %d hits shown, %d without mapping, %d missing, %d skipped"),
     #images, total, skipped.unmapped, skipped.missing, skipped.other)
   if fallback then
     status = _("no search text: filter search") .. "; " .. status
   end
+  status = status .. " (" .. timing .. ")"
+  dt.print_log(string.format("%s: %d items, %s", MODULE, #items, timing))
   set_status(status)
   dt.print(status)
 end
 
+--- Run a search with the buttons locked; see run_guarded.
+-- @param p table Parameters read from the widgets.
+local function run_search(p)
+  run_guarded(search_worker, p)
+end
+
 --- Check server reachability, version and API key.
-local function check_connection()
+-- Runs in the background thread like search_worker.
+local function check_worker()
   local settings, serr = load_settings()
   if not settings then
     set_status(serr)
@@ -1169,6 +1234,11 @@ local function check_connection()
 
   set_status(msg)
   dt.print(msg)
+end
+
+--- Check the connection with the buttons locked; see run_guarded.
+local function check_connection()
+  run_guarded(check_worker)
 end
 
 -- ---------------------------------------------------------------------------
@@ -1279,16 +1349,29 @@ end
 W.search = dt.new_widget("button") {
   label = _("search"),
   clicked_callback = function()
-    run_search(read_params())
+    -- Widget values are read here on the GTK thread; the work itself runs
+    -- in darktable's Lua background thread so the interface stays
+    -- responsive and the background jobs are drawn.
+    local p = read_params()
+    dt.control.dispatch(function()
+      run_search(p)
+    end)
   end,
 }
 
 W.check = dt.new_widget("button") {
   label = _("check connection"),
   clicked_callback = function()
-    check_connection()
+    dt.control.dispatch(check_connection)
   end,
 }
+
+--- Lock or unlock the two buttons that start a request.
+-- @param busy boolean True while a request runs.
+set_busy = function(busy)
+  W.search.sensitive = not busy
+  W.check.sensitive = not busy
+end
 
 W.restore = dt.new_widget("button") {
   label = _("restore previous collection"),

@@ -6,7 +6,7 @@ show the hits as a collection and edit the originals in the darkroom.
 darktable works on the original files; edits stay in the XMP sidecars that
 Immich picks up on its next library scan.
 
-Status: 0.2.2, working on the author's setup (darktable 5.6.2 Flatpak,
+Status: 0.3.0, working on the author's setup (darktable 5.6.2 Flatpak,
 Immich v3.3.5). Design notes in `concept.md`. UI in English and German.
 
 ## Requirements
@@ -77,6 +77,10 @@ Lighttable > module "Immich search":
   active before the first search
 - **check connection** verifies server, version and API key and reports
   whether smart search and OCR are enabled on the server
+- while a request runs, the left panel shows a background job ("Immich
+  search running ...", then a progress bar for the import that can be
+  cancelled there), **search** and **check connection** are locked, and the
+  status line ends with the seconds spent on the server and on the import
 
 Notes: smart search always returns as many hits as requested when enough
 assets exist. The file name filter in metadata mode is a case-insensitive

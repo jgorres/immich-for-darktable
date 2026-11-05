@@ -14,6 +14,8 @@ stub.collection_rules = { "ORIGINAL_RULE" }
 stub.displayed = nil
 stub.selection = {}
 stub.view = "lighttable"
+stub.dispatched = 0
+stub.jobs = {}
 
 local function noop() end
 
@@ -71,6 +73,14 @@ local dt = {
   print_error = log,
   register_lib = noop,
   register_event = noop,
+  control = {
+    -- darktable runs the function in a background thread; the stub runs it
+    -- synchronously so the tests can inspect the result right away.
+    dispatch = function(fn, ...)
+      stub.dispatched = stub.dispatched + 1
+      return fn(...)
+    end,
+  },
   gui = {
     current_view = function(view)
       if view then stub.view = view.id end
@@ -94,8 +104,10 @@ local dt = {
         end,
       },
     },
-    create_job = function()
-      return { valid = true, percent = 0 }
+    create_job = function(text, percentage)
+      local job = { text = text, percentage = percentage, valid = true, percent = 0 }
+      table.insert(stub.jobs, job)
+      return job
     end,
   },
   tags = {

@@ -106,6 +106,32 @@ stub.prefs["immich_search/timeout"] = 5
 local data, rerr = I.api_request(I.load_settings(), "/api/server/version")
 check(data == nil and rerr and rerr:find("not reachable", 1, true), "connection refused is reported as not reachable: " .. tostring(rerr))
 
+-- guard, button lock and dispatch (no live access needed) ------------------
+local before = #stub.imported
+I.widgets.query.text = "dog"
+I.widgets.search.clicked_callback()
+I.widgets.query.text = ""
+check(stub.dispatched == 1, "search button hands the work to dt.control.dispatch")
+check(I.widgets.status.label:find("not reachable", 1, true), "failed search reports in the status line: " .. I.widgets.status.label)
+check(#stub.imported == before, "failed search imports nothing")
+check(I.widgets.search.sensitive == true and I.widgets.check.sensitive == true and I.state.busy == false,
+  "buttons are unlocked and busy flag cleared after a failed search")
+check(stub.jobs[#stub.jobs].text == "Immich search running ..." and stub.jobs[#stub.jobs].valid == false,
+  "text-only search job is created and closed again")
+
+I.state.busy = true
+I.run_search(with({ query = "dog" }))
+check(stub.log[#stub.log] == "a request is already running", "second start while busy is rejected")
+I.state.busy = false
+
+local real_read = stub.dt.preferences.read
+stub.dt.preferences.read = function() error("boom") end
+I.widgets.check.clicked_callback()
+stub.dt.preferences.read = real_read
+check(I.widgets.status.label:find("internal error", 1, true) and I.widgets.status.label:find("boom", 1, true),
+  "Lua error inside the worker is reported: " .. I.widgets.status.label)
+check(I.widgets.search.sensitive == true and I.state.busy == false, "buttons are unlocked after an internal error")
+
 -- live -----------------------------------------------------------------------
 if live then
   local p = io.popen("pass show immich/darktable-api-key | head -1")
@@ -129,6 +155,7 @@ if live then
   I.run_search(with({ query = "dog", limit = 5 }))
   status = I.widgets.status.label
   check(status:find("^5 of 5 hits shown"), "smart search imports five hits: " .. status)
+  check(status:find("%(server %d+ s, import %d+ s%)$"), "status line ends with the timing: " .. status)
   check(#stub.imported == 5, "five images imported")
   local rule = stub.collection_rules[1]
   check(rule.data == "darktable|immich|dog" and rule.item == "DT_COLLECTION_PROP_TAG", "collection rule set to the result tag")
